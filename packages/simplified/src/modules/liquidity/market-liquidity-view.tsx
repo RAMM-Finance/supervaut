@@ -167,6 +167,7 @@ export const MarketLiquidityView = () => {
           <p>{"DESCRITPTIONS"}</p>
 
 
+
       <ul className={Styles.StatsRow}>
 <li>
             <span>One</span>

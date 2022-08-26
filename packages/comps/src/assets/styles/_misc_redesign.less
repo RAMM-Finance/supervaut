@@ -1,0 +1,136 @@
+// Redesigned Borders, Border Radius, Box Shadow, and Dash Lines values
+//arrangements
+@default-above: 2;
+//	Above Content
+@above-all-content: 10;
+@above-all-content-top-layer: 12;
+//	View Chrome
+@mask: 20;
+@mask-above: 30;
+// Modal
+@mask-modal: 100;
+
+// dash lines
+@dash-normal: 1 3;
+@dash-long: 1 5;
+
+:root {
+  --theme-primary-radius: @size-8;
+  --theme-secondary-radius: @size-8;
+  --theme-tertiary-radius: @size-16;
+  --theme-box-shadow: 0 @size-8 @size-40 rgba(var(--primary-text-rgb), 0.1);
+  --theme-gutter: @size-88;
+  --theme-top-bar-height: @size-72;
+  --theme-top-bar-height-mobile: @size-72;
+}
+:root[theme="DARK"] {
+  --theme-box-shadow: 0 @size-8 @size-40 rgba(var(--inverted-primary-text-rgb), 0.1);
+}
+
+:root[theme="SPORTS_DARK"],
+:root[theme="SPORTS"] {
+  --theme-primary-radius: @size-3;
+  --theme-secondary-radius: @size-6;
+  --theme-tertiary-radius: @size-6;
+  --theme-box-shadow: 0 0 @size-4 rgba(var(--primary-text-rgb) 0.15);
+  --theme-gutter: @size-32;
+  --theme-top-bar-height: @size-64;
+  --theme-top-bar-height-mobile: @size-48;
+}
+
+.default-dashline {
+  fill: none;
+  stroke: var(--primary-text);
+}
+
+.dashline-normal {
+  .default-dashline;
+
+  stroke-dasharray: @dash-normal;
+}
+
+.dashline-long {
+  .default-dashline;
+
+  stroke-dasharray: @dash-long;
+}
+
+.limit-lines(@amount) {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: @amount;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.TableTitle {
+  .text-20-bold;
+
+  color: var(--secondary-text);
+  text-transform: capitalize;
+}
+
+.ThemeBorder {
+  border: @size-1 solid var(--theme-border);
+  border-radius: var(--theme-primary-radius);
+}
+
+.HoverDropShadow {
+  box-shadow: unset;
+  transition: box-shadow 0.3s ease-out;
+
+  &:hover:not(:disabled) {
+    box-shadow: var(--theme-box-shadow);
+    transition: box-shadow 0.3s ease-out;
+  }
+}
+
+.FixedBoxShadow {
+  box-shadow: var(--theme-box-shadow);
+}
+
+.PrimaryTopBorderRadius {
+  border-top-left-radius: var(--theme-primary-radius);
+  border-top-right-radius: var(--theme-primary-radius);
+}
+
+.PrimaryBottomBorderRadius {
+  border-bottom-left-radius: var(--theme-primary-radius);
+  border-bottom-right-radius: var(--theme-primary-radius);
+}
+
+.PrimaryBorderRadius {
+  .PrimaryBottomBorderRadius;
+  .PrimaryTopBorderRadius;
+}
+
+.SecondaryTopBorderRadius {
+  border-top-left-radius: var(--theme-secondary-radius);
+  border-top-right-radius: var(--theme-secondary-radius);
+}
+
+.SecondaryBottomBorderRadius {
+  border-bottom-left-radius: var(--theme-secondary-radius);
+  border-bottom-right-radius: var(--theme-secondary-radius);
+}
+
+.SecondaryBorderRadius {
+  .SecondaryBottomBorderRadius;
+  .SecondaryTopBorderRadius;
+}
+
+.TertiaryTopBorderRadius {
+  border-top-left-radius: var(--theme-tertiary-radius);
+  border-top-right-radius: var(--theme-tertiary-radius);
+}
+
+.TertiaryBottomBorderRadius {
+  border-bottom-left-radius: var(--theme-tertiary-radius);
+  border-bottom-right-radius: var(--theme-tertiary-radius);
+}
+
+.TertiaryBorderRadius {
+  .TertiaryBottomBorderRadius;
+  .TertiaryTopBorderRadius;
+}

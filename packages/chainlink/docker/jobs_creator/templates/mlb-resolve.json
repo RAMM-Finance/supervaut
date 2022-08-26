@@ -1,0 +1,24 @@
+{
+  "name": "Augur | MLB Market Resolution - ${MLB_MARKET_FACTORY}",
+  "initiators": [
+    {
+      "type": "web"
+    },
+    {
+      "type": "cron",
+      "params": {
+        "schedule": "CRON_TZ=UTC 03 3,8 * * *"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "type": "augur-adapter",
+      "params": {
+        "sport": "mlb",
+        "method": "resolve",
+        "contractAddress": "${MLB_MARKET_FACTORY}"
+      }
+    }
+  ]
+}

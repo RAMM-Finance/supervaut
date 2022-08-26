@@ -1,0 +1,135 @@
+@import (reference) "~assets/styles/shared";
+@import (reference) "~modules/common/buttons.styles.less";
+
+div.Sidebar {
+  @media @breakpoint-mobile-tablet {
+    position: fixed;
+    background: var(--secondary-bg);
+    z-index: @above-all-content-top-layer;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: unset;
+    height: 100%;
+    grid-template-rows: @size-72 auto @size-72;
+  }
+}
+
+.Header {
+  padding: 0 @size-16;
+  border-bottom: @size-1 solid var(--theme-border);
+  display: flex;
+  height: var(--theme-top-bar-height);
+  min-height: var(--theme-top-bar-height);
+  max-height: var(--theme-top-bar-height);
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  grid-column: 1;
+  grid-row: 1;
+
+  > a {
+    height: @size-40;
+    width: @size-56;
+
+    > section {
+      height: @size-40;
+      width: @size-56;
+    }
+  } 
+
+  > span:first-of-type {
+    .text-20-bold;
+
+    text-transform: capitalize;
+    flex: 1;
+    justify-content: center;
+    display: flex;
+    padding-left: @size-58;
+  }
+
+  > span:last-of-type {
+    .ThemeBorder;
+
+    max-width: @size-56;
+    min-width: @size-56;
+    width: @size-56;
+    max-height: @size-48;
+    min-height: @size-48;
+    height: @size-48;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+    padding: none;
+    background: transparent;
+
+    > svg {
+      width: @size-20;
+      height: @size-16;
+
+      > path {
+        fill: var(--primary-text);
+      }
+    }
+  }
+}
+
+.Body {
+  display: flex;
+  flex-direction: column;
+  padding: @size-40 @size-66 @size-24 @size-16;
+  flex: 1;
+  grid-column: 1;
+  grid-row: 2;
+  overflow: auto;
+
+  > div:not(:last-of-type) {
+    margin-bottom: @size-24;
+  }
+
+  > ol {
+    > li {
+      &:not(:last-of-type) {
+        margin-bottom: @size-32;
+      }
+      > a {
+        .text-30-bold;
+
+        color: var(--secondary-text);
+        text-decoration: none;
+      }
+
+      &.Active {
+        > a {
+          color: var(--primary-text);
+        }
+      }
+    }
+  }
+}
+
+.Footer {
+  border-top: @size-1 solid var(--theme-border);
+  display: flex;
+  justify-content: space-between;
+  padding: @size-12 @size-16;
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.NavigationFooter {
+  .Footer;
+
+  justify-content: flex-end;
+}
+
+:root[theme="DARK"] {
+  .Header > a > section > svg > g > path:nth-of-type(2) {
+    fill: var(--primary-text);
+  }
+}

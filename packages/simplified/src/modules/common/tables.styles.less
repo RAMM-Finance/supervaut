@@ -1,0 +1,592 @@
+@import (reference) '~assets/styles/shared';
+
+.MarketTableHeader {
+  padding: @size-20 @size-32;
+  display: block;
+  border-bottom: @size-1 solid var(--theme-border);
+  min-width: @size-320;
+
+  > a {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    text-decoration: none;
+  }
+
+  > a > span:first-of-type {
+    .text-16-semi-bold;
+
+    color: var(--primary-text);
+    flex: 1;
+    margin-right: @size-12;
+    text-decoration: none;
+  }
+
+  > a > svg {
+    width: @size-20;
+    height: @size-20;
+    justify-self: flex-end;
+  }
+
+  > div:last-child {
+    .text-10-semi-bold;
+
+    color: var(--secondary-text);
+    margin-top: @size-6;
+  }
+
+  @media @breakpoint-mobile-tablet {
+    padding: @size-16;
+  }
+
+  @media @breakpoint-mobile {
+    > a {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-rows: auto auto;
+      grid-template-columns: auto auto;
+
+      > span:first-of-type {
+        margin: 0;
+        
+        &:nth-last-child(3) {
+          margin-top: @size-12;
+        }
+      }
+
+      > svg:first-of-type {
+        grid-column: 2;
+      }
+
+      > div:first-of-type {
+        grid-column: 1;
+        grid-row: 1;
+        margin: 0;
+      }
+    }
+  }
+}
+
+.MarketTitle {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+// shared styles
+
+.SharedTable {
+  .ThemeBorder;
+
+  display: flex;
+  background: var(--primary-bg);
+  flex-direction: column;
+  width: 100%;
+  overflow: auto;
+
+  > ul {
+    grid-column-gap: @size-4;
+  }
+
+  > span {
+    .EmptyMessage;
+
+    border-top: @size-1 solid var(--theme-border);
+    min-width: @size-320;
+  }
+}
+
+.RowHeaderSharedStyles {
+  padding: @size-20 @size-32;
+  display: grid;
+  align-items: center;
+
+  &:not(:last-of-type) {
+    border-bottom: @size-1 solid var(--theme-border);
+  }
+
+  > li {
+    display: flex;
+
+    &:not(:first-of-type) {
+      text-align: right;
+      justify-content: flex-end;
+    }
+  }
+
+  @media @breakpoint-mobile-tablet {
+    padding: @size-10 @size-16;
+    min-height: @size-56;
+  }
+}
+
+.HeaderSharedStyles {
+  > li {
+    .text-12-semi-bold;
+
+    color: var(--primary-text);
+    text-transform: capitalize;
+  }
+}
+
+.RowSharedStyles {
+  > li {
+    .text-12;
+
+    color: var(--primary-text);
+  }
+  @media @breakpoint-mobile-tablet {
+    padding: @size-20 @size-16;
+  }
+}
+
+// positions table
+
+// .PositionRowHeader {
+//   grid-template-columns: repeat(6, 1fr);
+//   min-width: @size-320;
+
+//   @media @breakpoint-mobile-tablet {
+//     grid-template-columns: @size-50 repeat(4, 1fr);
+
+//     > li:nth-of-type(4) {
+//       display: none;
+//     }
+//   }
+// }
+.PositionRowHeader {
+  grid-template-columns: repeat(3, 1fr);
+  min-width: @size-160;
+ // max-width: @size-320;
+
+  @media @breakpoint-mobile-tablet {
+    grid-template-columns: @size-50 repeat(4, 1fr);
+
+    > li:nth-of-type(4) {
+      display: none;
+    }
+  }
+}
+.PositionTable {
+  .SharedTable;
+}
+
+.PositionRow {
+  .RowHeaderSharedStyles;
+  .RowSharedStyles;
+  .PositionRowHeader;
+}
+
+.PositionHeader {
+  .RowHeaderSharedStyles;
+  .HeaderSharedStyles;
+  .PositionRowHeader;
+
+  > li > span {
+    margin-left: @size-4;
+
+    > div {
+      text-align: center;
+    }
+  }
+}
+
+// liquidity table
+
+.LiquidityRowHeader {
+  grid-template-columns: minmax(@size-104, 1fr) repeat(2, 1fr);
+  min-width: @size-320;
+}
+
+.LiquidityRow {
+  .RowHeaderSharedStyles;
+  .RowSharedStyles;
+  .LiquidityRowHeader;
+}
+
+.LiquidityHeader {
+  .RowHeaderSharedStyles;
+  .HeaderSharedStyles;
+  .LiquidityRowHeader;
+}
+
+.LiquidityTable {
+  .SharedTable;
+
+  > div:first-of-type {
+    min-width: @size-320;
+  }
+
+  > span {
+    justify-content: space-between;
+    padding: @size-20 @size-32;
+    min-width: @size-320;
+
+    > button {
+      margin-left: @size-1;
+    }
+  }
+
+  @media @breakpoint-mobile-tablet {
+    > span {
+      padding: @size-20 @size-16;
+    }
+  }
+}
+
+.FooterSharedStyles {
+  display: flex;
+  justify-content: flex-end;
+  flex-flow: row wrap;
+  padding: @size-20;
+  border-top: @size-1 solid var(--theme-border);
+  min-width: @size-320;
+
+  > button:not(:first-of-type) {
+    margin-left: @size-12;
+  }
+
+  @media @breakpoint-mobile-tablet {
+    padding: @size-20 @size-16;
+
+    > button {
+      flex: 1;
+
+      &:not(:first-of-type) {
+        margin-left: @size-8;
+      }
+    }
+  }
+}
+
+.BonusReward {
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 1 100%;
+  min-height: @size-116;
+  height: @size-116;
+  max-height: @size-116;
+
+  > h4 {
+    .text-14-semi-bold;
+
+    line-height: @size-20;
+    height: @size-20;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+
+    &:last-of-type {
+      align-self: flex-end;
+    }
+    > svg {
+      height: @size-16;
+      width: @size-16;
+      margin-left: @size-4;
+    }
+  }
+
+  > p {
+    .text-10-semi-bold;
+
+    color: var(--secondary-text);
+    line-height: @size-14;
+    min-height: @size-14;
+
+    &:last-of-type {
+      align-self: flex-end;
+    }
+  }
+
+  > span {
+    background: rgba(var(--success-rgb), 0.15);
+    border-radius: @size-32;
+    min-height: @size-8;
+    max-height: @size-8;
+    flex: 1 100%;
+    position: relative;
+    margin: @size-12 0;
+
+    > span {
+      background: var(--color-brand);
+      border-radius: @size-32;
+      min-height: @size-8;
+      max-height: @size-8;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: unset;
+    }
+  }
+}
+
+.LiquidityFooter {
+  .FooterSharedStyles;
+}
+
+.PositionFooter {
+  .FooterSharedStyles;
+
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  display: grid;
+
+  > span,
+  > button,
+  > a,
+  > a > button {
+    margin-right: @size-12;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  > span {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-flow: column nowrap;
+
+    > p {
+      .text-14-bold;
+
+      color: var(--warning);
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  > button {
+    grid-row: 1;
+  }
+
+  > a {
+    &:last-of-type {
+      grid-column: 3 / span 1;
+      grid-row: 1;
+    }
+  }
+
+  @media @breakpoint-mobile-tablet {
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    padding: @size-16;
+
+    > span,
+    > button,
+    > a,
+    > a > button {
+      flex: 1 100%;
+      width: 100%;
+      margin: @size-4 0;
+      text-align: center;
+
+      &:not(:first-of-type) {
+        margin-left: 0;
+      }
+    }
+
+    > span {
+      display: flex;
+      justify-content: center;
+      order: 2;
+      grid-row: 2;
+    }
+
+    > a {
+      &:last-of-type {
+        grid-column: 1 / span 3;
+      }
+    }
+  }
+}
+
+.PositionsLiquidityViewSwitcher {
+  flex-direction: column;
+
+  > span:first-of-type {
+    .EmptyMessage;
+    .ThemeBorder;
+  }
+
+  > div:nth-of-type(1) {
+    margin-bottom: @size-24;
+    display: flex;
+
+    > span {
+      .TableTitle;
+
+      color: var(--primary-text);
+
+      &.Selected,
+      &:hover {
+        color: var(--primary-text);
+      }
+
+      &:first-of-type {
+        margin-right: @size-32;
+      }
+    }
+  }
+
+  > div:nth-of-type(2) {
+    > div {
+      &:not(:last-of-type) {
+        margin-bottom: @size-12;
+      }
+    }
+
+    > div:last-of-type {
+      justify-content: center;
+
+      &:not(:first-of-type) {
+        margin-top: @size-40;
+      }
+    }
+  }
+}
+
+.PaginationFooter {
+  .FooterSharedStyles;
+
+  justify-content: center;
+}
+
+.TransactionsSharedRowHeader {
+  grid-template-columns: @size-150 repeat(4, 1fr);
+
+  @media @breakpoint-mobile {
+    grid-template-columns: @size-150 repeat(2, 1fr);
+    min-width: @size-320;
+
+    > li {
+      &:nth-of-type(3),
+      &:nth-of-type(4) {
+        display: none;
+      }
+    }
+  }
+
+  @media @breakpoint-tablet {
+    grid-template-columns: @size-150 repeat(3, 1fr);
+    min-width: @size-320;
+
+    > li {
+      &:nth-of-type(4) {
+        display: none;
+      }
+    }
+  }
+}
+
+.TransactionsHeader {
+  .RowHeaderSharedStyles;
+  .HeaderSharedStyles;
+  .TransactionsSharedRowHeader;
+
+  > li:first-of-type {
+    > span:not(:first-of-type) {
+      margin-left: @size-8;
+    }
+
+    > span {
+      cursor: pointer;
+      color: var(--secondary-text);
+
+      &.Selected {
+        color: var(--primary-text);
+      }
+
+      &:hover {
+        color: var(--primary-text);
+      }
+    }
+  }
+
+  > li:last-of-type {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    > svg {
+      margin-left: @size-8;
+    }
+  }
+}
+
+.SortUp {
+  > svg {
+    transform: rotate(-180deg);
+  }
+}
+
+.TransactionsTable {
+  .SharedTable;
+
+  > span {
+    .EmptyMessage;
+
+    min-width: @size-320;
+  }
+}
+
+.TransactionRow {
+  .RowHeaderSharedStyles;
+  .RowSharedStyles;
+  .TransactionsSharedRowHeader;
+
+  > li {
+    > a {
+      text-decoration: none;
+      color: var(--primary-text);
+    }
+
+    &:first-of-type {
+      > a {
+        .text-12-semi-bold;
+      }
+    }
+
+    &:nth-of-type(1) > a,
+    &:nth-of-type(5) > a {
+      color: var(--secondary-text);
+
+      &:hover {
+        color: var(--primary-text);
+      }
+    }
+  }
+}
+
+@media @breakpoint-mobile-tablet {
+  .PositionsLiquidityViewSwitcher {
+    > div:first-of-type {
+      > button {
+        margin-left: auto;
+      }
+    }
+  }
+}
+
+@media @breakpoint-mobile {
+  .PositionsLiquidityViewSwitcher {
+    > div:first-of-type {
+      > span {
+        .text-18-bold;
+
+        color: var(--secondary-text);
+
+        &:first-of-type {
+          margin-right: @size-16;
+        }
+      }
+    }
+  }
+}
+
+.MarginTop {
+  margin-top: @size-24;
+}

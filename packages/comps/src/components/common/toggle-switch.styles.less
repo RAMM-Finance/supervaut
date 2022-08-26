@@ -1,0 +1,159 @@
+@import (reference) '~assets/styles/shared';
+
+.ToggleSwitch {
+  .ThemeBorder;
+
+  background-color: var(--primary-bg);
+  display: flex;
+  position: relative;
+  width: @size-68;
+  height: @size-25;
+  align-items: center;
+  padding: 0;
+  cursor: pointer;
+
+  &:focus {
+    outline: 0;
+  }
+
+  > span {
+    .text-12-semi-bold;
+
+    position: relative;
+    z-index: 2;
+    padding: 0 @size-8;
+
+    &:first-of-type {
+      color: var(--secondary-text);
+
+      &:hover {
+        color: var(--primary-text);
+      }
+    }
+
+    &:last-of-type {
+      color: var(--primary-text);
+    }
+  }
+
+  > div {
+    .ThemeBorder;
+
+    position: absolute;
+    z-index: 1;
+    display: inline-block;
+    width: @size-34;
+    height: @size-25;
+    background-color: var(--tertiary-bg);
+    border: @size-1 solid var(--secondary-text);
+    transform: translateX(100%);
+    transition: all 0.1s linear 0s;
+  }
+
+  &.On {
+    > span {
+      &:first-of-type {
+        color: var(--primary-text);
+      }
+
+      &:last-of-type {
+        color: var(--secondary-text);
+
+        &:hover {
+          color: var(--primary-text);
+        }
+      }
+    }
+
+    > div {
+      transform: translateX(0%);
+      transition: all 0.1s linear 0s;
+    }
+  }
+
+  &.buySell {
+    width: 170px;
+    height: @size-50;
+
+    > span {
+      .text-20-bold;
+
+      padding: @size-12 @size-24;
+
+      &:first-of-type {
+        color: var(--secondary-text);
+
+        &:hover {
+          color: var(--primary-text);
+        }
+      }
+
+      &:last-of-type {
+        color: var(--primary-bg);
+      }
+    }
+
+    > div {
+      width: 84px;
+      height: @size-46;
+      margin-top: -@size-1;
+      border-color: transparent;
+      background-color: var(--primary-text);
+      margin-left: -@size-1;
+    }
+
+    &.On {
+      > span {
+        &:last-of-type {
+          color: var(--secondary-text);
+
+          &:hover {
+            color: var(--primary-text);
+          }
+        }
+
+        &:first-of-type {
+          color: var(--primary-bg);
+        }
+      }
+
+      > div {
+        margin-left: @size-1;
+      }
+    }
+  }
+
+  &.clean {
+    .ThemeBorder;
+
+    background: var(--tertiary-bg);
+    width: @size-40;
+    max-width: @size-40;
+    min-height: @size-24;
+    max-height: @size-24;
+    border-radius: @size-64;
+ 
+    > div {
+      min-height: @size-18;
+      max-height: @size-18;
+      min-width: @size-18;
+      max-width: @size-18;
+      border-radius: @size-40;
+      border: none;
+      background: var(--secondary-text);
+      transform: translateX(@size-2);
+      transition: all 0.1s linear 0s, background 0s linear 0s;
+    }
+
+    &.On {
+      border: none;
+      background: var(--color-brand);
+      
+      > div {
+        transform: translateX(100%);
+        background: var(--primary-bg);
+        transition: all 0.1s linear 0s, background 0s linear 0s;
+      }
+    }
+  }
+}

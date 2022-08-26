@@ -1,0 +1,251 @@
+@import (reference) "~assets/styles/shared";
+
+.AppStats {
+  .ThemeBorder;
+
+  border-radius: @size-8;
+  height: @size-150;
+  background: var(--quaternary-bg);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+
+  > div {
+    border-right: @size-1 solid var(--theme-border);
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+
+    &:first-of-type {
+      padding-left: 0;
+    }
+
+    &:last-of-type {
+      border-right: 0;
+      padding-right: 0;
+    }
+
+    > span:first-of-type {
+      .text-16-semi-bold;
+
+      margin-top: auto;
+      margin-bottom: @size-16;
+    }
+
+    > span:last-of-type,
+    > span:nth-of-type(2) {
+      .text-30-bold;
+
+      margin-bottom: auto;
+      height: @size-24;
+    }
+  }
+
+  &.CashAmounts {
+    display: flex;
+
+    > div {
+      padding-right: @size-36;
+
+      &:last-of-type {
+        border-right: @size-1 solid var(--theme-border);
+      }
+    }
+  }
+
+  &.small {
+    height: 108px;
+
+    > div {
+      > span:first-of-type {
+        .text-16-semi-bold;
+
+        margin-bottom: @size-8;
+      }
+
+      > span {
+        .text-30-bold;
+      }
+    }
+
+    @media @breakpoint-mobile-tablet {
+      > div {
+        > span:first-of-type {
+          .text-12-semi-bold;
+
+          margin-bottom: @size-2;
+        }
+      }
+    }
+  }
+
+  &.full {
+    height: 108px;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+
+    > div {
+      align-items: center;
+      display: flex;
+      flex-flow: column nowrap;
+    }
+  }
+}
+
+.AddLiquidityButton {
+  flex-flow: column nowrap;
+  min-height: @size-82;
+  height: @size-82;
+  max-height: @size-82;
+  
+  > span:first-of-type {
+    .text-20-bold;
+
+    color: var(--primary-text);
+    margin-bottom: @size-4;
+  }
+
+  > span:last-of-type {
+    .text-16;
+
+    color: var(--primary-text);
+  }
+}
+
+.AddMetaMaskToken {
+  grid-column: 2;
+  cursor: pointer;
+  display: flex;
+  flex-flow: row nowrap;
+  max-width: max-content;
+  justify-self: flex-end;
+
+  > img {
+    margin-right: @size-4;
+  }  
+}
+
+.AvailableLiquidityRewards {
+  .ThemeBorder;
+
+  border-color: var(--color-brand);
+  padding: @size-24;
+  background: var(--primary-bg);
+  display: grid;
+  grid-template-columns: 1fr 0fr;
+  grid-gap: @size-2 @size-40;
+  max-width: 406px;
+  max-height: 108px;
+
+  > section {
+    display: flex;
+    flex-flow: column nowrap;
+
+    &:first-of-type {
+      > h4 {
+        .text-14-semi-bold;
+    
+        color: var(--primary-text);
+        margin-bottom: @size-4;
+      }
+      
+      > p {
+        .text-12;
+    
+        color: var(--secondary-text);
+      }
+    }
+
+    &:last-of-type {
+      justify-content: center;
+
+      > span:first-of-type {
+        .text-20-semi-bold;
+    
+        color: var(--primary-text);
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-gap: @size-4;
+        line-height: @size-20;
+        max-height: @size-20;
+    
+        > svg {
+          height: @size-20;
+          width: @size-20;
+        }
+      }
+    
+      > span:last-of-type {
+        .text-12-semi-bold;
+    
+        color: var(--secondary-text);
+      }
+    }
+  }
+}
+
+@media @breakpoint-mobile-tablet {
+  .AppStats {
+    height: auto;
+    padding: 0;
+    padding-left: @size-4;
+    padding-right: @size-4;
+
+    > div {
+      padding: @size-14 @size-8;
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      justify-content: center;
+      align-items: center;
+
+      > span:first-of-type {
+        .text-10-semi-bold;
+
+        text-align: center;
+        white-space: pre-wrap;
+        margin-bottom: @size-2;
+      }
+
+      &:nth-of-type(3),
+      &:nth-of-type(4) {
+        .text-12-bold;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: @size-14 @size-8;
+
+        > span:first-of-type {
+          margin-bottom: @size-2;
+          text-align: center;
+        }
+      }
+    }
+
+    &.small {
+      height: auto;
+    }
+
+    &.full {
+      > div > span:last-of-type {
+        .text-12-bold;
+      }
+    }
+
+    &.LPOnly {
+      > div > span:first-of-type {
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .AvailableLiquidityRewards {
+    max-height: unset;
+    max-width: unset;
+    grid-gap: @size-12;
+    padding: @size-8 @size-16;
+  }
+
+  .AddMetaMaskToken {
+    margin-bottom: @size-8;
+  }
+}

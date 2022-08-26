@@ -1,0 +1,48 @@
+@import (reference) '~assets/styles/shared.less';
+
+.App {
+  display: flex;
+  flex-flow: column nowrap;
+  grid-gap: 0 @size-16;
+  flex: 1;
+  position: relative;
+  
+  > div {
+    max-width: @desktop-max;
+    box-sizing: border-box;
+    margin-top: var(--theme-top-bar-height);
+    width: 100%;
+    min-height: 100vh;
+    margin: var(--theme-top-bar-height) auto 0;
+  }
+}
+
+.ModalShowing {
+  overflow: hidden;
+}
+
+.SidebarOut {
+  @media @breakpoint-mobile-tablet {
+    max-height: 100vh;
+    overflow-y: hidden;
+  }
+}
+
+.TwoToneContent { 
+  background: linear-gradient(to right, var(--secondary-bg), var(--secondary-bg) 50%, var(--quaternary-bg) 51%, var(--quaternary-bg));
+
+  @media @breakpoint-mobile-tablet {
+    background: unset;
+  }
+
+  > footer > div:last-of-type {
+    background: var(--quaternary-bg);
+  }
+}
+
+
+body {
+  @media @breakpoint-mobile-tablet {
+    --is-mobile: true;
+  }
+}

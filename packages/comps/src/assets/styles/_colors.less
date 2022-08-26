@@ -1,0 +1,85 @@
+@color-brand: #2ae7a8;
+@color-brand-secondary: #ffffff;
+@color-brand-tertiary: #650ff2;
+@color-twitter: #55acee;
+@color-twitter-2: #ffffff;
+@color-facebook: #3b5998;
+@color-facebook-2: #ffffff;
+
+:root {
+  // branding
+  --color-brand: @color-brand;
+  --color-brand-rgb: 42, 231, 168;
+  --color-brand-secondary: @color-brand-secondary;
+  --color-brand-secondary-rgb: 255, 255, 255;
+  --color-brand-tertiary: @color-brand-tertiary;
+  --color-brand-tertiary-rgb: 102, 15, 242;
+  // social
+  --color-twitter: @color-twitter;
+  --color-twitter-2: @color-twitter-2;
+  --color-facebook: @color-facebook;
+  --color-facebook-2: @color-facebook-2;
+  // text
+  --primary-text: #15171a;
+  --primary-text-rgb: 21, 23, 26;
+  --secondary-text: #8b959e;
+  --secondary-text-rgb: 139, 149, 158;
+  --tertiary-text: hsl(208, 9%, 58%);
+  --tertiary-text-rgb: 139, 149, 158;
+  --inverted-primary-text: #ffffff;
+  --inverted-primary-text-rgb: 255, 255, 255;
+  // backgrounds
+  --primary-bg: #ffffff;
+  --primary-bg-rgb: 255, 255, 255;
+  --secondary-bg: #f6f7f8;
+  --secondary-bg-rgb: 246, 247, 248;
+  --tertiary-bg: #edeff1;
+  --tertiary-bg-rgb: 237, 239, 241;
+  --quaternary-bg: #fafbfc;
+  --quaternary-bg-rgb: 250, 251, 252;
+  --inverted-primary-bg: #15171a;
+  --inverted-primary-bg-rgb: 21, 23, 26;
+  // misc
+  --theme-border: #dbe1e7;
+  --theme-border-rgb: 219, 225, 231;
+  --theme-focus: #1b91ff;
+  --theme-focus-rgb: 27, 145, 255;
+  // status
+  --failed: #ff3e13;
+  --failed-rgb: 255, 62, 19;
+  --warning: #f59300;
+  --warning-rgb: 245, 147, 0;
+  --success: #0cce8d;
+  --success-rgb: 12, 206, 141;
+  // trading
+  --buy: #0cce8d;
+  --buy-rgb: 12, 206, 141;
+  --sell: #ff7d5e;
+  --sell-rgb: 255, 125, 94;
+  // outcomes
+  --theme-outcome-0: #58586b;
+  --theme-outcome-1: #0cce8d;
+  --theme-outcome-2: #ff7d5e;
+  --theme-outcome-3: #73d2de;
+  --theme-outcome-4: #218380;
+  --theme-outcome-5: #ffbc42;
+  --theme-outcome-6: #d81159;
+  --theme-outcome-7: #1f71b5;
+  // categories
+  --medical-color: #73d2de;
+  --finance-color: #ff7d5e;
+  --entertainment-color: #ffbc42;
+  --politics-color: #1f71b5;
+  --crypto-color: #218380;
+  --sports-color: #d81159;
+}
+
+@color-outcome-list: var(--theme-outcome-0) var(--theme-outcome-1) var(--theme-outcome-2) var(--theme-outcome-3)
+  var(--theme-outcome-4) var(--theme-outcome-5) var(--theme-outcome-6) var(--theme-outcome-7);
+
+.generate-trading-indexed-color-outcome-classes(@rules) {
+  each(@color-outcome-list, {
+    @newIndex: @index;
+    @rules();
+  });
+}

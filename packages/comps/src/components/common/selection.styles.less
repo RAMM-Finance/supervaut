@@ -1,0 +1,527 @@
+@import (reference) "~assets/styles/shared";
+
+.Dropdown {
+  .ThemeBorder;
+
+  cursor: pointer;
+  display: flex;
+  position: relative;
+  width: 100%;
+
+  > span {
+    display: none;
+  }
+
+  > select {
+    display: none;
+  }
+
+  > button {
+    .PrimaryBorderRadius;
+
+    align-items: center;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    white-space: nowrap;
+    width: 100%;
+    background: transparent;
+    color: var(--primary-text);
+    cursor: pointer;
+
+    > b {
+      margin-right: auto;
+    }
+
+    // arrow
+    > svg {
+      height: @size-6;
+      margin: 0 @size-1 0 @size-13;
+      width: @size-10;
+
+      > path {
+        fill: var(--secondary-text);
+      }
+    }
+
+    &:hover {
+      border: @size-1 solid var(--secondary-text);
+    }
+
+    &:focus {
+      outline: 0;
+    }
+
+    &:focus-visible {
+      border: @size-1 solid var(--theme-focus-color);
+      box-shadow: inset 0 0 0 @size-2 var(--theme-focus-color);
+    }
+
+    &:active {
+      border: @size-1 solid var(--secondary-text);
+    }
+  }
+
+  // div wrapper for hover state when margin-top is not zero.
+  > div {
+    .FixedBoxShadow;
+
+    min-width: 100%;
+    max-height: @size-380;
+    overflow-y: auto;
+    position: absolute;
+    top: 106%;
+    z-index: @default-above;
+    border-radius: @size-8;
+
+    > div:first-of-type {
+      .ThemeBorder;
+
+      background-color: var(--primary-bg);
+      display: none;
+      overflow-x: hidden;
+
+      &.active {
+        display: block;
+      }
+
+      > button {
+        .text-16-semi-bold;
+
+        color: var(--secondary-text);
+        background-color: var(--primary-bg);
+        position: relative;
+        text-align: left;
+        white-space: nowrap;
+        width: 100%;
+        border: 0;
+        padding: @size-16 @size-24;
+        cursor: pointer;
+        text-transform: capitalize;
+
+        &:hover {
+          color: var(--primary-text);
+        }
+
+        &:focus {
+          outline: 0;
+        }
+
+        &.Selected {
+          color: var(--primary-text);
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          color: var(--secondary-text);
+        }
+
+        > svg {
+          display: none;
+          margin-left: @size-4;
+        }
+      }
+    }
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  @media @breakpoint-mobile {
+    > div.mobileOverlay {
+      background-color: rgba(var(--primary-text-rgb), 0.4);
+      border-radius: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: unset;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: @mask-modal;
+
+      > div:first-of-type {
+        width: 100%;
+        margin: 0 @size-32;
+        z-index: @mask-modal;
+      }
+    }
+  }
+}
+
+.label {
+  display: flex;
+
+  > span {
+    .text-16-bold;
+
+    color: var(--primary-text);
+    text-transform: capitalize;
+  }
+
+  &.Selected {
+    display: flex;
+  }
+}
+
+.SelectedLabel {
+  color: var(--primary-text);
+
+  &.invalidColor {
+    color: var(--theme-outcome-0);
+  }
+}
+
+// Used in expiration date selection and top section in outcome candlesticks
+.Normal {
+  .Dropdown;
+
+  max-width: fit-content;
+  max-width: -moz-fit-content;
+  border: 0;
+
+  > button {
+    .text-10-semi-bold;
+    .ThemeBorder;
+
+    background: var(--tertiary-bg);
+    padding: @size-12 @size-18 @size-12 @size-16;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // vertical line before arrow icon
+    > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      display: flex;
+    }
+
+    // arrow
+    > svg {
+      margin-left: @size-46;
+      display: flex;
+      width: @size-15;
+      height: @size-9;
+    }
+  }
+
+  > div {
+    width: fit-content;
+
+    > div {
+      width: 100%;
+    }
+  }
+}
+
+.isOpen {
+  > button {
+    border: @size-1 solid var(--secondary-text);
+
+    // arrow
+    > svg {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.openTop {
+  > div {
+    bottom: 106%;
+    top: unset;
+  }
+}
+
+.Labeled {
+  display: flex;
+  flex-flow: row nowrap;
+
+  > span {
+    .text-14;
+
+    color: var(--secondary-text);
+    display: flex;
+    flex-flow: row nowrap;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+    margin-right: @size-4;
+  }
+
+  > button {
+    color: var(--primary-text);
+    border: 0;
+    background: transparent;
+    padding: 0;
+
+    &:focus {
+      outline: 0;
+    }
+
+    &:hover {
+      border: 0;
+    }
+
+    > span {
+      .text-14;
+
+      border-bottom: @size-1 dotted var(--primary-text);
+
+      &:hover {
+        border-bottom: @size-1 solid var(--primary-text);
+      }
+    }
+
+    > svg {
+      margin-left: @size-4;
+      height: @size-5;
+      width: @size-9;
+
+      > path {
+        fill: var(--primary-text);
+      }
+    }
+  }
+
+  > div {
+    .PrimaryBorderRadius;
+
+    > div:first-of-type {
+      padding: @size-12 @size-16;
+
+      > button {
+        .text-14;
+
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: space-between;
+        padding: @size-12 0 @size-11;
+        border-bottom: @size-1 solid var(--theme-border);
+
+        > svg {
+          display: block;
+        }
+
+        &:first-of-type {
+          .PrimaryTopBorderRadius;
+
+          padding-top: 0;
+        }
+
+        &:last-of-type {
+          .PrimaryBottomBorderRadius;
+
+          padding-bottom: 0;
+          border-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+// Used in outcome selector in order ticket
+.showColor {
+  position: relative;
+
+  &::before {
+    width: @size-2;
+    content: "";
+    position: absolute;
+    top: @size-1;
+    left: @size-1;
+    bottom: @size-1;
+    border-top-left-radius: @size-3;
+    border-bottom-left-radius: @size-3;
+  }
+
+  .generate-trading-indexed-color-outcome-classes({
+    &.showColor-@{newIndex} {
+      &::before {
+        background-color: @value;
+      };
+    }
+  });
+}
+
+.MenuOpen {
+  > button > svg {
+    fill: var(--primary-text);
+  }
+}
+
+.CurrencyDropdown {
+  background-color: var(--primary-bg);
+  border: 0;
+  border-radius: @size-8;
+
+  > button {
+    background-color: transparent;
+    border: 0;
+    align-items: center;
+    padding: 0 @size-8;
+    border-radius: @size-8;
+
+    > span {
+      .text-16-semi-bold;
+
+      margin-right: @size-8;
+      margin-left: @size-4;
+      justify-content: center;
+      align-items: center;
+      display: flex;
+
+      > svg {
+        margin-right: @size-4;
+        height: @size-22;
+        width: @size-22;
+      }
+    }
+
+    > svg {
+      margin-left: 0;
+      height: @size-6;
+      width: @size-10;
+
+      > path {
+        fill: var(--primary-text);
+      }
+    }
+
+    &:hover,
+    &:active,
+    &:focus {
+      border: 0;
+      outline: 0;
+    }
+  }
+
+  &:hover,
+  &:active,
+  &:focus {
+    border: 0;
+    outline: 0;
+  }
+}
+
+.SelectionGroup {
+  > span {
+    .text-16;
+
+    color: var(--primary-text);
+    text-transform: capitalize;
+    margin-bottom: @size-10;
+    display: flex;
+  }
+
+  > div {
+    display: flex;
+    flex-flow: row wrap;
+
+    > div {
+      margin-right: @size-8;
+      margin-bottom: @size-8;
+    }
+  }
+}
+
+.SharedSelectionItem {
+  .ThemeBorder;
+
+  padding: @size-10 @size-12;
+  display: flex;
+  align-items: center;
+
+  > input {
+    width: @size-20;
+    height: @size-20;
+    margin: 0;
+    display: flex;
+    pointer-events: none;
+  }
+
+  > span {
+    .text-16-semi-bold;
+
+    color: var(--secondary-text);
+    text-transform: capitalize;
+    white-space: nowrap;
+    margin-left: @size-8;
+  }
+
+  &.Selected {
+    > span {
+      color: var(--primary-text);
+    }
+  }
+}
+
+.Checkbox {
+  .SharedSelectionItem;
+}
+
+.RadioBar {
+  .SharedSelectionItem;
+
+  > input {
+    width: @size-20;
+    height: @size-20;
+    margin: 0;
+    display: flex;
+  }
+}
+
+.list {
+  display: flex;
+}
+
+.SmallDropdown {
+  > button {
+    padding: @size-12;
+    background-color: var(--primary-bg);
+
+    > span {
+      .text-12-semi-bold;
+    }
+
+    > svg {
+      width: @size-10;
+      height: @size-6;
+
+      > path {
+        fill: var(--secondary-text);
+      }
+    }
+  }
+}
+
+.MultiButtonSelection {
+  display: flex;
+  flex-flow: row nowrap;
+  grid-gap: @size-4;
+
+  > li > button {
+    .ThemeBorder;
+    .text-12-semi-bold;
+
+    background: transparent;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+    grid-gap: @size-8;
+    outline: none;
+
+    &:hover {
+      border: @size-1 solid var(--secondary-text);
+    }
+  }
+}

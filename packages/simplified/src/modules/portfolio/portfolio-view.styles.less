@@ -1,0 +1,176 @@
+@import (reference) '~assets/styles/shared';
+  // display: grid;
+  // grid-template-columns: 1fr auto;
+  // grid-auto-rows: 0fr;
+  // grid-gap: @size-8 @size-16;
+  // padding: @size-40 @size-88 @size-48;
+
+.PortfolioView {
+   // .FixedBoxShadow;
+   // .ThemeBorder;
+    align-items: center;
+
+ padding: @size-40 @size-88 @size-48;
+ //  .TwoTonePage;
+  // .TwoTonePageGrid;
+  > section:first-of-type {
+    flex-flow: column nowrap;
+
+    > div[class*="PositionsLiquidityViewSwitcher"] {
+      margin-top: @size-64;
+     // margin: @size-16 0 @size-24 0;
+  //   column-width: @size-128
+    }
+
+    > div[class*="Activity"] {
+      display: none;
+    }
+
+    > div[class*="RewardsSection"] {
+      margin: @size-16 0 @size-24 0;
+    }
+  }
+}
+
+@media @breakpoint-mobile-tablet {
+  .PortfolioView {
+    grid-template-columns: 1fr;
+    flex-flow: column nowrap;
+
+    > section:last-of-type {
+      display: none;
+    }
+
+    > section:first-of-type  {
+      padding: @size-16 @size-16 @size-40;
+      max-width: 100%;
+
+      > div[class*="AppStats"] > div {
+        padding-left: 0;
+        padding-right: 0;
+        grid-gap: 0;
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+
+        > span {
+          text-align: center;
+          justify-content: center;
+          align-items: center;
+          grid-column: span 2;
+
+          &:first-of-type {
+            margin-bottom: @size-2;
+          }
+
+          &:last-of-type {
+            .text-14-bold;
+          }
+        }
+      }
+
+      > div[class*="PositionsLiquidityViewSwitcher"] {
+        margin-top: @size-40;
+      }
+
+      > div[class*="Activity"] {
+        display: flex;
+      }
+    }
+
+  }
+}
+
+@media @breakpoint-mobile {
+  .PortfolioView {
+    > section:first-of-type > div[class*="RewardsSection"] {
+      margin: @size-8 0 0 0;
+    }
+  }
+}
+
+.RewardsSection {
+  .PrimaryBorderRadius;
+
+  padding: @size-15 @size-24;
+  background-color: var(--color-brand-secondary);
+  border: @size-1 solid var(--theme-border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-gap: @size-16;
+
+  > div {
+    display: flex;
+  }
+
+  > div:first-of-type {
+    flex-direction: column;
+
+    > span:first-of-type {
+      .text-14-semi-bold;
+    }
+
+    > span:nth-of-type(2) {
+      .text-10-semi-bold;
+
+      color: var(--secondary-text);
+    }
+  }
+
+  > div:nth-of-type(2) {
+    align-items: center;
+
+    > span:first-of-type {
+      .text-14-semi-bold;
+
+      display: flex;
+      align-items: center;
+
+      > svg {
+        width: @size-20;
+        height: @size-20;
+        margin-left: @size-8;
+      }
+    }
+  }
+
+  @media @breakpoint-mobile {
+    padding: @size-10 @size-16;
+
+    > div:first-of-type {
+      > span:first-of-type {
+        .text-12-semi-bold;
+      }
+    }
+  }
+}
+
+.ClaimableWinningsSection {
+  display: flex;
+  flex-flow: row nowrap;
+
+  > button {
+    margin-top: @size-16;
+    flex: 1;
+
+    &:first-of-type:not(:last-of-type) {
+      margin-right: @size-8;
+    }
+  }
+
+  @media @breakpoint-mobile-tablet {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-gap: @size-8 0;
+    margin-top: @size-16;
+
+    > button {
+      margin-top: 0;
+
+      &:first-of-type:not(:last-of-type) {
+        margin-right: 0;
+      }
+    }
+  }
+}

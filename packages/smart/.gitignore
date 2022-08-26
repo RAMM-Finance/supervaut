@@ -1,0 +1,13 @@
+#Hardhat files
+cache
+artifacts
+types
+dist
+
+# typechain
+typechain
+
+# abis
+abi
+
+environments/undefined.json

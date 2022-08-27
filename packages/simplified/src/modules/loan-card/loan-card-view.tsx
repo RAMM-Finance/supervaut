@@ -6,7 +6,7 @@ import classNames from "classnames";
 import { ValueLabel } from "@augurproject/comps/build/components/common/labels";
 import type { Loan } from "@augurproject/comps/build/types";
 import BN from "bignumber.js"
-import Styles from "./loan-card.styles.less";
+// import Styles from "./loan-card.styles.less";
 
 import { utils, BytesLike, BigNumber } from "ethers" 
 
@@ -36,7 +36,7 @@ export const LoanCard = ({
 
   return (
     <article
-      className={Styles.LoanCard}
+      //className={Styles.LoanCard}
     >
       <Link
             data-testid={`link-${ID}`}

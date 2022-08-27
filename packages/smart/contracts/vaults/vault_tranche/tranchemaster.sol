@@ -170,10 +170,10 @@ contract TrancheMaster{
 
 		//provide(same amount to get a balanced pool)
 		uint[2] memory amounts; 
-		amounts[0] = ja; 
+		amounts[0] = sa; 
 		amounts[1] = ja; 
 		address[] memory tranches = splitter.getTrancheTokens(); 
-		ERC20(tranches[0]).approve(address(amm), ja); 
+		ERC20(tranches[0]).approve(address(amm), sa);
 		ERC20(tranches[1]).approve(address(amm), ja); 
 		uint lpshares = amm.addLiquidity(amounts, 0); 
 

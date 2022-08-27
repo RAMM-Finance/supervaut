@@ -32,6 +32,7 @@ import ProfileView from "../profile/profile-view";
 import CreditLineProposalView from "../creditline-proposal/creditline-proposal-view";
 import CreditlineView from "../creditline/creditline-view";
 import InstrumentProposalView from "../instrument-proposal/instrument-proposal-view";
+import CreateVaultView from "../create/create-view"
 
 const { PathUtils: { makePath } } = Utils;
 
@@ -51,6 +52,7 @@ const Routes = p => {
       <Route path={makePath(LOAN)} component={LoanView} />
       <Route path={makePath(PROFILE)} component={ProfileView} />
       <Route path={makePath(CREDITLINE)} component={CreditlineView} />
+      <Route path={makePath("create")} component={CreateVaultView} />
       <Redirect to={makePath(MARKETS)} />
     </Switch>
   );

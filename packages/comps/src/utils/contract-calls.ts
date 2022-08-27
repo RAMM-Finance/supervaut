@@ -28,9 +28,9 @@ import {
   UserClaimTransactions,
   UserMarketTransactions,
 } from "../types";
-import { ethers } from "ethers";
+import { ethers, Transaction } from "ethers";
 import { Contract } from "@ethersproject/contracts";
-import { AbstractMarketFactoryV3__factory, addresses, DS, LinearBondingCurve__factory } from "@augurproject/smart";
+import { AbstractMarketFactoryV3__factory, addresses, DS, LinearBondingCurve__factory, TrancheFactory__factory } from "@augurproject/smart";
 
 // @ts-ignore
 import { ContractCallContext, ContractCallReturnContext, Multicall } from "@augurproject/ethereum-multicall";
@@ -97,8 +97,6 @@ import {
   LendingPool,
   ERC20__factory,
   IndexCDS__factory, 
-
-
   Vault__factory, 
   Instrument__factory, 
   Instrument, 
@@ -134,7 +132,8 @@ import {
   MM_address,
   RepNFT_address, 
   sample_instument_address,
-marketFactoryAddress
+  marketFactoryAddress,
+  trancheFactoryAddress
 } from "../data/constants";
 
 
@@ -221,6 +220,35 @@ export async function setupContracts (account: string, library: Web3Provider) {
 
   // let MM = MarketManager__factory.connect(MM_address, getProviderOrSigner(library, account)); 
 }
+
+interface initParams {
+  _want: string,
+  _instruments: string[],
+  _ratios: string[],
+  _junior_weight: string,
+  _promisedReturn: string,
+  _time_to_maturity: string,
+  vaultId: string
+}
+
+// SUPER VAULT FUNCTIONS
+export async function createSuperVault (
+  account: string,
+  library: Web3Provider,
+  params: initParams
+): Promise<TransactionResponse> {
+  let tx: TransactionResponse
+  try {
+    const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
+    tx = await tFact.createVault(params);
+  } catch(err) {
+    console.log("error calling createSuperVault")
+    console.log("params: ", params)
+    console.log("error: ", err)
+  }
+  return tx;
+}
+
 
 // NEW STUFF BELOW
 

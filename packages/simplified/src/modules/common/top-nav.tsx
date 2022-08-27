@@ -214,11 +214,16 @@ export const TopNav = () => {
                 Profile
               </Link>
             </li>
-            <li className={classNames({ [Styles.Active]: path === PROPOSAL })}>
+            {/* <li className={classNames({ [Styles.Active]: path === PROPOSAL })}>
               <Link to={makePath(PROPOSAL)} disabled={!isLogged} placeholder="Pools">
                 Proposals
               </Link>
-            </li>               
+            </li>    */}
+            <li className={classNames({ [Styles.Active]: path === REDEEM })}>
+              <Link to={makePath("create")} disabled={!isLogged} placeholder="Pools">
+                Create
+              </Link>
+            </li>              
           </ol>
         )}
       </section>

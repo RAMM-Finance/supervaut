@@ -18,6 +18,9 @@ export const chefAddress = "0x42a0549a4063378cb96cac64ffb434da1e2817bd";
 
 export const PRICE_PRECISION = 6;
 
+// SUPER VAULT BROS
+export const trancheFactoryAddress = "";
+
 // DEBITA 2.0
 //Jeong tests:
 // export const controller_address = "0x7d90D8190195E1435a4db20cFdF0764B75DDF649";

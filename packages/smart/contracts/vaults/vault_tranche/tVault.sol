@@ -62,7 +62,7 @@ contract tVault is ERC4626{
     junior_weight = param._junior_weight; 
     promisedReturn = param._promisedReturn; 
     time_to_maturity = param._time_to_maturity; 
-    init_time = block.timestamp; 
+    init_time = block.timestamp;
 
     initial_exchange_rates = new uint[](num_instrument); 
     PRICE_PRECISION = 10**want.decimals(); 
@@ -191,8 +191,4 @@ contract tVault is ERC4626{
     return sumAssets; 
 
   }
-
-
- 
-
 }

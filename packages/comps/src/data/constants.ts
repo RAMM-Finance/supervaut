@@ -19,7 +19,14 @@ export const chefAddress = "0x42a0549a4063378cb96cac64ffb434da1e2817bd";
 export const PRICE_PRECISION = 6;
 
 // SUPER VAULT BROS
-export const trancheFactoryAddress = "";
+export const trancheFactoryAddress = "0x0C3DFeE94E2Db42ce550EE86845c8C1E4495f4EC";
+export const trancheMasterAddress = "0x6F4A9507b18637396D49A99b67e5979a8eb04A98";
+export const testVault1Address = "0xdc2Cc9719FE2Da9d5B16475595C77DF049CD7b1F"; 
+export const testVault2Address = "0xA9729DC13825b3d4400353B6BF1F9e6F5338cb25"; 
+
+// export const splitterFactoryAddress = "0x6ca985c180287fC6312e268221c64866BB49B9b3"; 
+// export const trancheAMMFactoryAddress = "0xe8Bbb18D0cd6EB4a2BBd1CdF583A23DE3F533Fc4"; 
+
 
 // DEBITA 2.0
 //Jeong tests:
@@ -45,3 +52,12 @@ export const marketFactoryAddress = "0x0559B2a21d6479b9a03ea835D83895f5aEE47C5f"
 // deploying "Vault" (tx: 0xb88aaeee453eab0f0094e62b5189e4f2cf52b8ad74e929daab4f39f5fe40f049)...: deployed at 0x3C95067507C0346e40439E46dD9FFce3eF4F264E with 3103729 gas
 // deploying "CreditLine" (tx: 0xf4d43efa4c9f4128351aa2fcbe64a520da5dedf8dc4498f762565fa32d304b3e)...: deployed at 0x3667a4FFAbd519960d8E3e4C1d781E3A9Af40e2F with 838924 gas
 // deploying "TrustedMarketFactoryV3" (tx: 0x6814eacdc84f4ad1c187b0793587af304d3e4de4192869875b79f1b1cde1e632)...: deployed at 0x0559B2a21d6479b9a03ea835D83895f5aEE47C5f with 3958784 gas
+
+// reusing "TrustedMarketFactoryV3" at 0x1Acf78fc24925F119c003F84c2Ca0Bd6aCC45469
+// reusing "TrustedFetcher" at 0xb5DE4b75513609483506d36f071E81D9e802bB49
+// reusing "TrancheAMMFactory" at 0x332c842cd9ac69764Bd0bB58ab979AE941475ddB
+// reusing "SplitterFactory" at 0x7fE68Dc2f40dcBab1d919D887A6e9e5CB61f73A8
+// reusing "TrancheFactory" at 0x0C3DFeE94E2Db42ce550EE86845c8C1E4495f4EC
+// reusing "TrancheMaster" at 0x6F4A9507b18637396D49A99b67e5979a8eb04A98
+// deploying "testVault1" (tx: 0x18050b405b192524f5ac6e2dc6dfe16df7ac34c7f4d0364ae814bf737b82f060)...: deployed at 0xdc2Cc9719FE2Da9d5B16475595C77DF049CD7b1F with 2534113 gas
+// deploying "testVault2" (tx: 0x1363f04fa653869ad39cc161b00089c238b53628d30dbc1c192761cce92fd2d9)...: deployed at 0xA9729DC13825b3d4400353B6BF1F9e6F5338cb25 with 2534113 gas

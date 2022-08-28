@@ -68,7 +68,7 @@ import {
 import * as _ApprovalHooks from "./stores/use-approval-callback";
 import * as _GraphClient from "./apollo/client";
 import ModalConnectWallet from "./components/modal/modal-connect-wallet";
-import { ToggleSwitch, BuySellToggleSwitch } from "./components/common/toggle-switch";
+import { ToggleSwitch, BuySellToggleSwitch,BuySellSwapToggleSwitch,TrancheToggleSwitch} from "./components/common/toggle-switch";
 import { Toasts } from "./components/toasts/toasts";
 import {MarketCardProvider, MarketCardContext} from "./components/market-card/market-card-context"; 
 
@@ -156,7 +156,7 @@ export const Logo = _Logo;
 export const ButtonComps = _Buttons;
 export const LabelComps = _Labels;
 export const InputComps = _Inputs;
-export const SelectionComps = { ..._Selections, ToggleSwitch, BuySellToggleSwitch };
+export const SelectionComps = { ..._Selections, ToggleSwitch, BuySellToggleSwitch, BuySellSwapToggleSwitch,TrancheToggleSwitch};
 export const Icons = {
   ..._Icons,
   CATEGORIES_ICON_MAP: _CATEGORIES_ICON_MAP,

@@ -38,7 +38,7 @@ const {
   MarketCardComps: { MarketTitleArea },
   ButtonComps: { PrimaryThemeButton, SecondaryThemeButton },
 } = Components;
-const { canAddLiquidity, getMaticUsdPrice } = ContractCalls;
+const { canAddLiquidity, getMaticUsdPrice, createExampleSuperVault} = ContractCalls;
 const {
   DateUtils: { getMarketEndtimeDate },
   Formatter: { formatApy, formatCash, formatToken },
@@ -54,6 +54,12 @@ interface LiquidityMarketCardProps {
   key?: string;
   market: MarketInfo;
 }
+
+const confirmCreate = async ({account, loginAccount}) => {     
+
+  await createExampleSuperVault(account, loginAccount.library); 
+};
+
 
 const applyFiltersAndSort = (
   passedInMarkets,
@@ -162,6 +168,7 @@ const LiquidityMarketCard = ({ market }: LiquidityMarketCardProps): React.FC => 
     settings: { timeFormat },
   } = useSimplifiedStore();
   const {
+    account, 
     balances: { lpTokens, pendingRewards },
     loginAccount,
   } = useUserStore();
@@ -336,6 +343,8 @@ const LiquidityView = () => {
     actions: { updatePoolsViewSettings },
   } = useSimplifiedStore();
   const {
+    account, 
+    loginAccount, 
     balances: { lpTokens, pendingRewards },
   } = useUserStore();
   const { markets, transactions } = useDataStore();
@@ -423,6 +432,8 @@ const LiquidityView = () => {
       />
       <section>
         <article>
+            <button onClick={() => confirmCreate(  {account, loginAccount})}>CreateMarket</button> 
+
           <span>Market</span>
           {Object.keys(POOL_SORT_TYPES).map((sortType) => (
             <SortableHeaderButton

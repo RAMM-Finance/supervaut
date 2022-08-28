@@ -26,7 +26,8 @@ import { MARKETS_LIST_HEAD_TAGS } from "../seo-config";
 
 const { newFunction, createMarket,endMarket, estimateAddLiquidityPool, mintCompleteSets_,
 createMarket_, mintDS, resolveMarket, contractApprovals,
-doBulkTrade, addProposal, doOwnerSettings ,mintRepNFT, resolveZCBMarket} = ContractCalls;
+doBulkTrade, addProposal, doOwnerSettings ,mintRepNFT, resolveZCBMarket,
+createExampleSuperVault} = ContractCalls;
 const { approveERC20Contract } = ApprovalHooks;
 
 const {
@@ -151,13 +152,13 @@ const confirmBulkTrade = async({
 }
 
 
-const confirmCreate =async({
-  account, loginAccount
-}) =>{
-  addProposal(
-    account, loginAccount.library 
-    )
-}
+// const confirmCreate =async({
+//   account, loginAccount
+// }) =>{
+//   addProposal(
+//     account, loginAccount.library 
+//     )
+// }
 
 const confirmMintRepNFT = async({
   account,  loginAccount, 
@@ -166,6 +167,10 @@ await mintRepNFT( account, loginAccount.library);
 }
 
 
+const confirmCreate = async ({account, loginAccount}) => {     
+
+  await createExampleSuperVault(account, loginAccount.library); 
+};
 
 const applyFiltersAndSort = (
   passedInMarkets,
@@ -401,6 +406,7 @@ const MarketsView = () => {
 
                       
                   */  }
+            <button onClick={() => confirmCreate(  {account, loginAccount})}>CreateMarket</button> 
 
        {/* <SquareDropdown
           onChange={(value) => {

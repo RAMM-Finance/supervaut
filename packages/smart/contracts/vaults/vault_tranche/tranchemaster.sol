@@ -12,6 +12,7 @@ import {ERC20} from "../tokens/ERC20.sol";
 import {Splitter} from "./splitter.sol";
 import {tVault} from "./tVault.sol";
 import {StableSwap} from "./stableswap.sol"; 
+import {TrustedMarketFactoryV3} from "../../turbo/TrustedMarketFactoryV3.sol"; 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 /// @notice have to separate factories because of code size limit 
@@ -32,6 +33,14 @@ contract TrancheAMMFactory{
 	}
 } 
 
+contract SplitterFactory{
+
+	function newSplitter(tVault newvault) external returns(Splitter){
+		return new Splitter(newvault); 
+	}
+
+}
+
 
 /// @notice contract that stores the contracts and liquidity for each tranches 
 contract TrancheFactory{
@@ -40,7 +49,8 @@ contract TrancheFactory{
   address owner; 
 
   TrancheAMMFactory ammFactory; 
-
+  SplitterFactory splitterFactory; 
+  TrustedMarketFactoryV3 marketFactory; 
 	/// @notice initialization parameters for the vault
 	struct InitParams{
 		address _want; 
@@ -64,11 +74,14 @@ contract TrancheFactory{
 
     constructor(
         address _owner, 
-        address ammFactory_address
+        address ammFactory_address, 
+        address splitterFactory_address, 
+        address marketFactoryAddress
     ) public {
         owner = _owner;
         ammFactory = TrancheAMMFactory(ammFactory_address); 
-
+        splitterFactory = SplitterFactory(splitterFactory_address); 
+        marketFactory = TrustedMarketFactoryV3(marketFactoryAddress); 
     }
 
 
@@ -83,24 +96,37 @@ contract TrancheFactory{
 	/// param timetomaturity: when the tVault matures and tranche token holders can redeem their tranche for tVault 
 	/// @dev a bid is filled when liquidity provider agrees to provide initial liq for senior/junior or vice versa.  
 	/// so initial liq should be provided nonetheless 
-	function createVault(InitParams memory param) public {
+	function createVault(
+		InitParams memory param, 
+		string[] calldata names, 
+		string calldata _description) public {
+
+
+		uint vaultId = marketFactory.createMarket(msg.sender, _description, names, param._ratios); 
+		param.vaultId = vaultId; 
+		setupContracts(vaultId, param); 
+
+	}	
+
+	function setupContracts(
+		uint vaultId, 
+		InitParams memory param) internal{
 
 		tVault newvault = new tVault(param); 
-		Splitter splitter = new Splitter(newvault);
+		Splitter splitter = splitterFactory.newSplitter(newvault); 
 		address[] memory tokens = splitter.getTrancheTokens(); 
 		StableSwap amm = ammFactory.newPool(tokens[0], tokens[1]); 
 
-		uint vaultId = param.vaultId; 
 		Contracts storage contracts = vaultContracts[vaultId]; 
 		contracts.vault = address(newvault); 
 		contracts.splitter = address(splitter);
 		contracts.amm = address(amm); 
 		contracts.param = param;
+	}
 
-		numVaults++; 
-	}	
-
-
+	function getParams(uint256 vaultId) public returns(InitParams memory) {
+		return vaultContracts[vaultId].param; 
+	}
 	/// @notice lp token balance is stored in this contract
 	function increaseLPTokenBalance(address to, uint vaultId, uint lpshares) external{
 		lp_holdings[vaultId][to] += lpshares; 
@@ -149,7 +175,7 @@ contract TrancheMaster{
 	function addLiquidity(
 		address provider,
 		 uint amount, 
-		 uint vaultId) external 
+		 uint vaultId) external returns(uint)
 	{	
 
 		TrancheFactory.Contracts memory contracts = tFactory.getContracts(vaultId); 
@@ -169,17 +195,31 @@ contract TrancheMaster{
 		(uint ja, uint sa) = splitter.split(vault, shares); 
 
 		//provide(same amount to get a balanced pool)
+		uint lpshares = separatAndProvide(ja, sa, splitter, amm); 
+		// uint[2] memory amounts; 
+		// amounts[0] = ja; 
+		// amounts[1] = ja; 
+		// address[] memory tranches = splitter.getTrancheTokens(); 
+		// ERC20(tranches[0]).approve(address(amm), sa);
+		// ERC20(tranches[1]).approve(address(amm), ja); 
+		// uint lpshares = amm.addLiquidity(amounts, 0); 
+
+		//Transfer
+		tFactory.increaseLPTokenBalance(provider, vaultId, lpshares);
+
+		return lpshares; 
+
+	}
+
+	function separatAndProvide(uint ja, uint sa, Splitter splitter, StableSwap amm) internal returns(uint){
 		uint[2] memory amounts; 
-		amounts[0] = sa; 
+		amounts[0] = ja; 
 		amounts[1] = ja; 
 		address[] memory tranches = splitter.getTrancheTokens(); 
 		ERC20(tranches[0]).approve(address(amm), sa);
 		ERC20(tranches[1]).approve(address(amm), ja); 
 		uint lpshares = amm.addLiquidity(amounts, 0); 
-
-		//Transfer
-		tFactory.increaseLPTokenBalance(provider, vaultId, lpshares);
-
+		return lpshares; 
 	}
 
 	/// @notice remove liquidity from the pool, and gives back merged token

@@ -10,7 +10,6 @@ import {FixedPointMathLib} from "../utils/FixedPointMathLib.sol";
 
 import {ERC20} from "../tokens/ERC20.sol";
 import {Instrument} from "../instrument.sol";
-import {Vault} from "../vault.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import {TrancheFactory} from "./tranchemaster.sol"; 
 import "hardhat/console.sol";

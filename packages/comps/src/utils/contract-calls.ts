@@ -107,6 +107,9 @@ import {
   BondingCurve__factory, 
   //LinearShortZCB__factory, 
 
+  TrancheMaster__factory, 
+
+
 } from "@augurproject/smart";
 import { fetcherMarketsPerConfig, isIgnoredMarket, isIgnoreOpendMarket } from "./derived-market-data";
 import { getDefaultPrice } from "./get-default-price";
@@ -133,7 +136,10 @@ import {
   RepNFT_address, 
   sample_instument_address,
   marketFactoryAddress,
-  trancheFactoryAddress
+  trancheFactoryAddress,
+  trancheMasterAddress, 
+  testVault1Address,
+  testVault2Address
 } from "../data/constants";
 
 
@@ -146,6 +152,78 @@ const { parseBytes32String, formatBytes32String } = utils;
 
 const trimDecimalValue = (value: string | BN) => createBigNumber(value).decimalPlaces(6, 1).toFixed();
 
+interface initParams {
+  _want: string,
+  _instruments: string[],
+  _ratios: string[],
+  _junior_weight: string,
+  _promisedReturn: string,
+  _time_to_maturity: string,
+  vaultId: string
+}
+const pp_ = BigNumber.from(10).pow(6);
+
+interface InitParams{
+  _want: string; 
+  _instruments: string[]; 
+  _ratios: BigNumber[];
+  _junior_weight: BigNumber;
+  _promisedReturn: BigNumber;
+  _time_to_maturity: BigNumber; 
+  vaultId: BigNumber; 
+}
+
+
+
+export async function createExampleSuperVault (
+  account: string,
+  library: Web3Provider,
+  _want: string = collateral_address, 
+  _instruments: string[] = [testVault1Address,testVault2Address ], 
+  _ratios: string[] = ["600000", "400000"], 
+  _junior_weight: string = "300000", 
+  _promisedReturn: string = "100000",
+  _time_to_maturity: string = "1000000", 
+  vaultId: string = "0"
+): Promise<TransactionResponse> {
+  let tx: TransactionResponse
+  const params = {} as InitParams; 
+  params._want = _want; 
+    params._instruments =  _instruments; 
+    params._ratios = [pp_.mul(7).div(10), pp_.mul(3).div(10)]; 
+    params._junior_weight = pp_.mul(3).div(10); 
+    params._promisedReturn = pp_.mul(1).div(10);
+    params._time_to_maturity = pp_.mul(10);
+    params.vaultId = pp_.mul(0);   // const _want = collateral_address; 
+
+    const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
+        console.log('params', params)
+
+    tx = await tFact.createVault(params, ["senior","junior"] ,"description");
+  // try {
+  //   const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
+  //   tx = await tFact.createVault(params, "name", "description");
+  // } catch(err) {
+  //   console.log("error calling createSuperVault")
+  //   console.log("params: ", params)
+  //   console.log("error: ", err)
+  // }
+  return tx;
+}
+
+
+export async function addTrancheLiquidity 
+ (account: string,
+  library: Web3Provider, 
+  amount: string, 
+  vaultId: string){
+  const trancheMaster = TrancheMaster__factory.connect(trancheMasterAddress,getProviderOrSigner(library, account) ); 
+  const collateral = Cash__factory.connect(collateral_address, getProviderOrSigner(library,account));
+
+  await collateral.approve(trancheMasterAddress,String(Number(amount)*2)); 
+  await trancheMaster.addLiquidity( account, amount, vaultId); 
+
+}
 // ONLY FOR TESTING.
 export async function setupContracts (account: string, library: Web3Provider) {
 

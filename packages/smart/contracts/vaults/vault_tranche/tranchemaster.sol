@@ -35,8 +35,8 @@ contract TrancheAMMFactory{
 
 contract SplitterFactory{
 
-	function newSplitter(tVault newvault) external returns(Splitter){
-		return new Splitter(newvault); 
+	function newSplitter(tVault newvault, uint vaultId, address tMasterAd) external returns(Splitter){
+		return new Splitter(newvault, vaultId, tMasterAd); 
 	}
 
 }
@@ -45,12 +45,13 @@ contract SplitterFactory{
 /// @notice contract that stores the contracts and liquidity for each tranches 
 contract TrancheFactory{
 
-	uint256 numVaults; 
-  address owner; 
+  	uint256 numVaults; 
+  	address owner; 
+  	address tMasterAd; 
 
-  TrancheAMMFactory ammFactory; 
-  SplitterFactory splitterFactory; 
-  TrustedMarketFactoryV3 marketFactory; 
+  	TrancheAMMFactory ammFactory; 
+  	SplitterFactory splitterFactory; 
+  	TrustedMarketFactoryV3 marketFactory; 
 	/// @notice initialization parameters for the vault
 	struct InitParams{
 		address _want; 
@@ -84,6 +85,11 @@ contract TrancheFactory{
         marketFactory = TrustedMarketFactoryV3(marketFactoryAddress); 
     }
 
+	/// @notice called right after deployed 
+	function setTrancheMaster(address tMasterAd) external {
+		require(msg.sender == owner); 
+		tMasterAd = _tMasterAd; 
+	}
 
 
 	/// @notice adds vaults, spllitters, and amms when tranche bids are filled 
@@ -111,9 +117,10 @@ contract TrancheFactory{
 	function setupContracts(
 		uint vaultId, 
 		InitParams memory param) internal{
+		require(tMasterAd != address(0), "trancheMaster not set"); 
 
 		tVault newvault = new tVault(param); 
-		Splitter splitter = splitterFactory.newSplitter(newvault); 
+		Splitter splitter = splitterFactory.newSplitter(newvault, vaultId, tMasterAd); 
 		address[] memory tokens = splitter.getTrancheTokens(); 
 		StableSwap amm = ammFactory.newPool(tokens[0], tokens[1]); 
 
@@ -265,7 +272,7 @@ contract TrancheMaster{
 		uint vaultId, 
 		uint amount, 
 		bool wantSenior
-		) external 
+		) external returns(uint)
 	{
 		TrancheFactory.Contracts memory contracts = tFactory.getContracts(vaultId); 
 		ERC20 want = ERC20(contracts.param._want); 
@@ -296,6 +303,7 @@ contract TrancheMaster{
 		//4. Transfer 
 		uint transferamount = wantSenior? sa: ja; 
 		ERC20(tranches[tokenOut]).transfer(msg.sender, transferamount + tokenOutAmount); 
+		return transferamount + tokenOutAmount; 
 
 	}
 

@@ -20,6 +20,7 @@ import {
   MARKET_TYPE_OPTIONS,
   POOL_SORT_TYPES,
   POOL_SORT_TYPE_TEXT,
+  MINT,
 } from "../constants";
 import { BonusReward } from "../common/tables";
 import { useSimplifiedStore } from "../stores/simplified";
@@ -257,7 +258,7 @@ const LiquidityMarketCard = ({ market }: LiquidityMarketCardProps): React.FC => 
             disabled={!canAddLiq}
             action={() =>
               history.push({
-                pathname: makePath(MARKET_LIQUIDITY),
+                pathname: makePath(MINT),
                 search: makeQuery({
                   [MARKET_ID_PARAM_NAME]: marketId,
                   [MARKET_LIQUIDITY]: hasLiquidity ? ADD : CREATE,

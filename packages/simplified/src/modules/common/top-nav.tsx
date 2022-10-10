@@ -199,12 +199,12 @@ export const TopNav = () => {
                 Pools
               </Link>
             </li>
-            <li className={classNames({ [Styles.Active]: path === MINT })}>
+           <li className={classNames({ [Styles.Active]: path === MINT })}>
               <Link to={makePath(MINT)} placeholder="Pools">
                 Mint
               </Link>
             </li>
-           <li className={classNames({ [Styles.Active]: path === REDEEM })}>
+          {/*  <li className={classNames({ [Styles.Active]: path === REDEEM })}>
               <Link to={makePath(REDEEM)} placeholder="Pools">
                 Redeem
               </Link>
@@ -213,7 +213,7 @@ export const TopNav = () => {
               <Link to={makePath(PROFILE)} disabled={!isLogged} placeholder="Pools">
                 Profile
               </Link>
-            </li>
+            </li>*/}
             {/* <li className={classNames({ [Styles.Active]: path === PROPOSAL })}>
               <Link to={makePath(PROPOSAL)} disabled={!isLogged} placeholder="Pools">
                 Proposals

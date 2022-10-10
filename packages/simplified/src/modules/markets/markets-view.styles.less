@@ -117,17 +117,21 @@
   }
 }
 
-.MintView {
-  display: flex;
-  flex-flow: column nowrap;
 
-  @media screen and (max-width: 1300px) {
+.MintView
+ {
+  display: block;
+  flex-flow: column nowrap;
+// flex-direction: row;
+  // justify-content: flex-start;
+
+  @media screen and (max-width: 3600px) {
     padding-right: 26rem;
     padding-left: 26rem;
     padding-top: 2rem;
   }
 
-  @media screen and (min-width: 1300px) {
+  @media screen and (min-width: 3600px) {
     padding-right: 32rem;
     padding-left: 32rem;
     padding-top: 2rem;

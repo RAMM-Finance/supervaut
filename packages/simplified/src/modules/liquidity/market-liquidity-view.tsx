@@ -31,6 +31,8 @@ import {
   USDC,
 
 } from "../constants";
+import {SwapMenu} from "./swap"; 
+import {MintView} from "../mint/mint"; 
 const {
   ButtonComps: { SecondaryThemeButton, TinyThemeButton },
   LabelComps: { CategoryIcon, WarningBanner },
@@ -154,9 +156,9 @@ export const MarketLiquidityView = () => {
     });
     closeModal();
   };
-  console.log('marketid',market.turboId); 
   return (
     <div className={classNames(Styles.MarketLiquidityView)}>
+
       <BackBar {...{ market, selectedAction, setSelectedAction, BackToLPPageAction, setAmount, maxWhackedCollateral }} />
       <MarketLink id={marketId} dontGoToMarket={true}>
         {/*<CategoryIcon {...{ categories }} /> */}
@@ -204,21 +206,26 @@ export const MarketLiquidityView = () => {
         </ul>
 
 
+     
 
         </div>   
-
-
+       
+       {/* <SwapMenu/> */}
         <MarketTitleArea {...{ ...market, timeFormat }} />
       </MarketLink>
           <h4>Add/Remove Liquidity</h4>
+
 
       <LiquidityForm {...{ market, selectedAction, setSelectedAction, BackToLPPageAction, amount, setAmount }} />
       {selectedAction !== MINT_SETS && selectedAction !== RESET_PRICES && <LiquidityWarningFooter />}
           <h4>Trade</h4>
 
-      <TradeForm {...{ market, selectedAction, setSelectedAction, BackToLPPageAction, amount, setAmount }} />
-      {selectedAction !== MINT_SETS && selectedAction !== RESET_PRICES && <LiquidityWarningFooter />}
+     {/* <TradeForm {...{ market, selectedAction, setSelectedAction, BackToLPPageAction, amount, setAmount }} />
+      {selectedAction !== MINT_SETS && selectedAction !== RESET_PRICES && <LiquidityWarningFooter />} */}
+
+         <MintView/>
     </div>
+
   );
 };
 

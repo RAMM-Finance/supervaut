@@ -6,6 +6,7 @@ import {
   Components,
   Utils,
   useDataStore,
+  useAppStatusStore,
   useUserStore,
   Constants,
   ContractCalls,
@@ -163,7 +164,11 @@ const applyFiltersAndSort = (
 
   setFilteredMarkets(updatedFilteredMarkets);
 };
+const confirmCreateAction = async({
 
+}) =>{
+    console.log('hey'); 
+}
 const LiquidityMarketCard = ({ market }: LiquidityMarketCardProps): React.FC => {
   const {
     settings: { timeFormat },
@@ -173,6 +178,8 @@ const LiquidityMarketCard = ({ market }: LiquidityMarketCardProps): React.FC => 
     balances: { lpTokens, pendingRewards },
     loginAccount,
   } = useUserStore();
+    const {actions: {setModal},} = useAppStatusStore(); 
+
   const { transactions } = useDataStore();
   const {
     marketId,
@@ -251,6 +258,27 @@ const LiquidityMarketCard = ({ market }: LiquidityMarketCardProps): React.FC => 
           </span>
           <span>(${rewardsInUsd})</span>
         </div>
+      { 
+        <SecondaryThemeButton
+            text="AtomicBuy/Sell"
+            small
+            disabled={!canAddLiq}
+            action={()=>
+              setModal({
+                  type: "MODAL_CONFIRM_TRANSACTION",
+                  title: "Confirm Creation", 
+                  transactionButtonText: "Create",
+                  targetDescription: {market, 
+                      label:"Vault"}, 
+                  transactionAction: ({onTrigger = null, onCancel = null})=>{
+                      onTrigger && onTrigger(); 
+                      confirmCreateAction(1); 
+                  }
+              })             
+          } 
+          />
+         
+        }
 { 
         <SecondaryThemeButton
             text="Trade"

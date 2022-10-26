@@ -1,14 +1,22 @@
-import { ContractCalls, useUserStore } from "@augurproject/comps";
+import { ContractCalls, useUserStore, useAppStatusStore, useDataStore} from "@augurproject/comps";
 import { SearchInput, TextInput, AmountInput} from "@augurproject/comps/build/components/common/inputs"; 
 import { PrimaryThemeButton, SecondaryThemeButton, TinyThemeButton } from "@augurproject/comps/build/components/common/buttons";
 import { SquareDropdown } from "@augurproject/comps/build/components/common/selection";
 import { calcWeights } from "@augurproject/comps/build/utils/calculations";
-import React, { useState, useCallback } from "react"
+import { Components } from "@augurproject/comps"; 
+import React, { ReactNode, useState, useCallback } from "react"
 import Styles from "./create-view.styles.less"
 import BigNumber, { BigNumber as BN } from "bignumber.js";
 import inputStyles from "../common/inputs.styles.less";
 import marketStyles from "../markets/markets-view.styles.less";
 import liquidityStyles from "../liquidity/liquidity-view.styles.less";
+const {
+  // Icons: { CloseIcon },
+  LabelComps: { generateTooltip },
+  // InputComps: { AmountInput, OutcomesGrid },
+  // ButtonComps: { SecondaryThemeButton },
+  // SelectionComps: { BuySellToggleSwitch },
+} = Components;
 
 const {createSuperVault} = ContractCalls
 
@@ -20,6 +28,43 @@ interface initParams {
     _promisedReturn: string,
     _time_to_maturity: string,
     vaultId: string
+}
+
+interface InfoNumberType {
+  label: string;
+  value: string;
+  tooltipText?: string;
+  tooltipKey?: string;
+  svg?: ReactNode;
+}
+
+interface InfoNumbersProps {
+  infos: InfoNumberType[];
+  unedited?: boolean;
+}
+const Info = ({infos, unedited} : InfoNumbersProps) =>{
+    return(
+        <div>
+
+        {infos.map((info)=>(
+            <div key = {info.label}>
+                <span>
+                    {info.label}
+                    {generateTooltip(info.tooltipText, info.tooltipKey)}
+                </span>
+            </div> 
+            ))
+        }
+        </div>
+    ); 
+}
+const getInfo = ()=>{
+    return ({
+        label: "label",
+        value: "-",
+        tooltipText: "tip",
+        tooltipKey: "key", 
+    })
 }
 
 const VaultInput = ({ amount, setAmount}) =>{
@@ -141,6 +186,7 @@ const CreationAmountInput = ({type, amount, setAmount})=>{
 
      <div className={inputStyles.AmountInput}>
         <label>{titles[type]}</label>
+        <Info infos = {[getInfo()]}/>
 
         <div className={inputStyles.AmountInputField}>
           <span></span>
@@ -201,15 +247,20 @@ const DurationInput = ({onChange, label, value}) => {
     </>
     );
 }
+const confirmCreateAction = async({
+
+}) =>{
+    console.log('hey'); 
+}
 
 const CreateVaultView = () => {
-    const { account, loginAccount } = useUserStore()
-
+    const { account, loginAccount } = useUserStore(); 
+    const{markets} = useDataStore(); 
     interface VaultItem {
         instrument: string,
         ratio: string
     }
-
+    const {actions: {setModal},} = useAppStatusStore(); 
     const [ asset, setAsset ] = useState("")
     const [ instruments, setInstruments ] = useState<VaultItem[]>([])
     const [ juniorWeight, setJuniorWeight ] = useState("")
@@ -224,6 +275,7 @@ const CreateVaultView = () => {
         days: "0",
         minutes: "0",
     });
+    const market = markets[0];
 
     console.log("instruments: ", instruments);
 
@@ -296,14 +348,17 @@ const CreateVaultView = () => {
             reset()        
         }
     })
-
+//TODO questionmark section, finish, confirmation popup from liquidity/market
+// placing bids at creation 
+// swap finish and leverage button, 
     return (
         <>
             <section className={marketStyles.mintView}>
                 <h2>
                     Create Super Vault
                 </h2>
-                <div>
+                <div>   
+
 
                     {/*<h3>Vault Duration</h3> */}
                     <br />
@@ -314,7 +369,6 @@ const CreateVaultView = () => {
                     <VaultInput  amount = {amount_} setAmount = {setAmount_}/>
             <h1>Step 3: Choose SuperVault Parameters</h1>
 
-                    <CreationAmountInput type = {1} amount = {amount_} setAmount = {setAmount_}/>
                     <CreationAmountInput type = {1} amount = {amount_} setAmount = {setAmount_}/>
 
                    {/* <DurationInput label="years" value={duration.years} onChange={(e)=> {
@@ -410,7 +464,21 @@ const CreateVaultView = () => {
                         }}
                     />
                 </div>
-                <PrimaryThemeButton action={create}  text={"Create"}/>
+
+                <PrimaryThemeButton action={()=>
+                    setModal({
+                        type: "MODAL_CONFIRM_TRANSACTION",
+                        title: "Confirm Creation", 
+                        transactionButtonText: "Create",
+                        targetDescription: {market, 
+                            label:"Vault"}, 
+                        transactionAction: ({onTrigger = null, onCancel = null})=>{
+                            onTrigger && onTrigger(); 
+                            confirmCreateAction(1); 
+                        }
+                    })
+                    
+                }  text={"Create"}/>
             </section>
         </>
     )

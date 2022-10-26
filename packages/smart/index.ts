@@ -49,6 +49,11 @@ import { Provider } from "@ethersproject/providers";
 import { ChainId, MarketFactorySubType, MarketFactoryType } from "./constants";
 import { CryptoCurrencyFetcher__factory } from "./typechain";
 
+// export {TrancheMaster, TrancheFactory} from "./typechain-types/tranchemaster.sol";
+// export{TrancheMaster__factory, TrancheFactory__factory} from "./typechain-types/factories/tranchemaster.sol";
+// // export {} from ""
+
+
 export * from "./typechain";
 export * from "./addresses";
 export * from "./constants";

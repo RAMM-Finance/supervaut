@@ -30,7 +30,7 @@ import {
 } from "../types";
 import { ethers, Transaction } from "ethers";
 import { Contract } from "@ethersproject/contracts";
-import { AbstractMarketFactoryV3__factory, addresses, DS, LinearBondingCurve__factory, TrancheFactory__factory } from "@augurproject/smart";
+import { AbstractMarketFactoryV3__factory, addresses, DS, LinearBondingCurve__factory } from "@augurproject/smart";
 
 // @ts-ignore
 import { ContractCallContext, ContractCallReturnContext, Multicall } from "@augurproject/ethereum-multicall";
@@ -107,7 +107,6 @@ import {
   BondingCurve__factory, 
   //LinearShortZCB__factory, 
 
-  TrancheMaster__factory, 
 
 
 } from "@augurproject/smart";
@@ -196,10 +195,10 @@ export async function createExampleSuperVault (
     params._time_to_maturity = pp_.mul(10);
     params.vaultId = pp_.mul(0);   // const _want = collateral_address; 
 
-    const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
-        console.log('params', params)
+    // const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
+    //     console.log('params', params)
 
-    tx = await tFact.createVault(params, ["senior","junior"] ,"description");
+    // tx = await tFact.createVault(params, ["senior","junior"] ,"description");
   // try {
   //   const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
   //   tx = await tFact.createVault(params, "name", "description");
@@ -217,11 +216,11 @@ export async function addTrancheLiquidity
   library: Web3Provider, 
   amount: string, 
   vaultId: string){
-  const trancheMaster = TrancheMaster__factory.connect(trancheMasterAddress,getProviderOrSigner(library, account) ); 
+  // const trancheMaster = TrancheMaster__factory.connect(trancheMasterAddress,getProviderOrSigner(library, account) ); 
   const collateral = Cash__factory.connect(collateral_address, getProviderOrSigner(library,account));
 
   await collateral.approve(trancheMasterAddress,String(Number(amount)*2)); 
-  await trancheMaster.addLiquidity( account, amount, vaultId); 
+  //await trancheMaster.addLiquidity( account, amount, vaultId); 
 
 }
 // ONLY FOR TESTING.
@@ -314,17 +313,19 @@ export async function createSuperVault (
   account: string,
   library: Web3Provider,
   params: initParams
-): Promise<TransactionResponse> {
-  let tx: TransactionResponse
-  try {
-    const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
-    tx = await tFact.createVault(params);
-  } catch(err) {
-    console.log("error calling createSuperVault")
-    console.log("params: ", params)
-    console.log("error: ", err)
-  }
-  return tx;
+) {
+  // let tx: TransactionResponse
+  // try {
+  //   const tFact = TrancheFactory__factory.connect(
+  //     trancheFactoryAddress, getProviderOrSigner(library, account));
+  //   tx = await tFact.createVault(params);
+
+  // } catch(err) {
+  //   console.log("error calling createSuperVault")
+  //   console.log("params: ", params)
+  //   console.log("error: ", err)
+  // }
+  // return tx;
 }
 
 

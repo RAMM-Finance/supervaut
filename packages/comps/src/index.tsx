@@ -40,6 +40,7 @@ import {
   getCategoryIconLabel,
   CATEGORIES_ICON_MAP as _CATEGORIES_ICON_MAP,
 } from "./components/common/category-icons-map";
+import {VaultDataProvider, useVaultDataStore, VaultDataStore} from "./stores/vault-data"
 import _DataStore, { useDataStore, DataStore } from "./stores/data";
 import _UserDataStore, { useUserStore, UserStore } from "./stores/user";
 import _AppStatusStore, { useAppStatusStore, AppStatusStore } from "./stores/app-status";
@@ -76,6 +77,10 @@ export const ContractCalls = _ContractCalls;
 export const Calculations = _Calculations;
 export const DerivedMarketData = _DerivedMarketData;
 export const GraphClient = _GraphClient;
+export const NewStores = {
+  VaultDataProvider, 
+  useVaultDataStore, VaultDataStore
+}
 export const Stores = {
   AppStatus: _AppStatusStore,
   Data: _DataStore,

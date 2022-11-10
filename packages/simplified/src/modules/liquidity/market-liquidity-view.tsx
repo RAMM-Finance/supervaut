@@ -31,7 +31,7 @@ import {
   USDC,
 
 } from "../constants";
-import {SwapMenu} from "./swap"; 
+// import {SwapMenu} from "./swap"; 
 import {MintView} from "../mint/mint"; 
 const {
   ButtonComps: { SecondaryThemeButton, TinyThemeButton },
@@ -137,7 +137,7 @@ export const MarketLiquidityView = () => {
   const isResetPrices = selectedAction === RESET_PRICES;
   const maxWhackedCollateral = market && maxWhackedCollateralAmount(market?.amm);
   const [showMoreDetails, setShowMoreDetails] = useState(false);
-
+  console.log('marketidhere', marketId); 
   const shareBalance =
     balances &&
     balances.lpTokens &&
@@ -156,6 +156,9 @@ export const MarketLiquidityView = () => {
     });
     closeModal();
   };
+  // TODO actions:
+  //mint tvault and split, swap back and redeem to tvault, add/remove liq, 
+  // show profits, 
   return (
     <div className={classNames(Styles.MarketLiquidityView)}>
 
@@ -181,27 +184,28 @@ export const MarketLiquidityView = () => {
 
       <ul className={Styles.StatsRow}>
 <li>
-            <span>One</span>
+            <span>Underlying</span>
             <span>{formatDai(100000000/4.2/1000000  || "0.00").full}</span>
             <span>{formatDai(100000000/5/1000000 || "0.00").full}</span>
            {/* <span>{marketHasNoLiquidity ? "-" : formatDai(storedCollateral/1000000 || "0.00").full}</span> */}
           </li>
           <li>
-            <span>ZCB Start Price </span>
+            <span>Vault(s) </span>
             <span>{formatDai(0.818 || "0.00").full}</span>
 
             {/*<span>{marketHasNoLiquidity ? "-" : formatLiquidity(amm?.liquidityUSD/10 || "0.00").full}</span> */}
           </li>
           <li>
-            <span>Market Phase </span>
+            <span>Junior Weight</span>
             <span>{"Resolved"}</span>
           </li>
 
           <li>
-            <span>Hedge Price</span>
+            <span>Promised Return</span>
             <span>{formatDai(100000000/1000000 || "0.00").full}</span>
             {/*<span>{marketHasNoLiquidity ? "-" : formatLiquidity(amm?.liquidityUSD || "0.00").full}</span>*/}
           </li>
+        {/*inception price,inception time, current value prices, current mark prices*/}
 
         </ul>
 
@@ -223,7 +227,6 @@ export const MarketLiquidityView = () => {
      {/* <TradeForm {...{ market, selectedAction, setSelectedAction, BackToLPPageAction, amount, setAmount }} />
       {selectedAction !== MINT_SETS && selectedAction !== RESET_PRICES && <LiquidityWarningFooter />} */}
 
-         <MintView/>
     </div>
 
   );

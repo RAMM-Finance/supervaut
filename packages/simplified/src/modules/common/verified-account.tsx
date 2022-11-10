@@ -33,7 +33,7 @@ export const VerifiedAccount = () => {
         if (account && loginAccount) {
             try {
                 let tx = await verifyAddress(account, loginAccount.library);
-                await tx.wait();
+                // await tx.wait();
             } catch (err) {
                 alert("error verifying account")
             }

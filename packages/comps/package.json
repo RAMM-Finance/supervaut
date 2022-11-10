@@ -34,7 +34,8 @@
     "react-helmet": "6.1.0",
     "react-router-dom": "^5.2.0",
     "react-tooltip": "^4.2.11",
-    "semver": "7.3.2"
+    "semver": "7.3.2",
+    "supervault": "1.0.3"
   },
   "scripts": {
     "check": "tsc --noEmit",

@@ -18,7 +18,8 @@ import {
   PathUtils,
   Constants,
   windowRef,
-  Components
+  Components, 
+  NewStores
 } from "@augurproject/comps";
 import {MintProvider} from "./mint/mintcontext"; 
 import {RedeemProvider} from "./redeem/redeemcontext"
@@ -95,6 +96,7 @@ const AppBody = () => {
 };
 
 function App() {
+  const {VaultDataProvider} = NewStores; 
   const {
     AppStatus: { AppStatusProvider },
     ConnectAccount: { ConnectAccountProvider },
@@ -105,6 +107,7 @@ function App() {
     <HashRouter hashType="hashbang">
       <ConnectAccountProvider>
         <UserProvider>
+        <VaultDataProvider>
           <DataProvider>
             <AppStatusProvider>
               <SimplifiedProvider>
@@ -118,6 +121,7 @@ function App() {
               </SimplifiedProvider>
             </AppStatusProvider>
           </DataProvider>
+          </VaultDataProvider>
         </UserProvider>
       </ConnectAccountProvider>
     </HashRouter>

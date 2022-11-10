@@ -31,7 +31,6 @@ import {
 import { ethers, Transaction } from "ethers";
 import { Contract } from "@ethersproject/contracts";
 import { AbstractMarketFactoryV3__factory, addresses, DS, LinearBondingCurve__factory } from "@augurproject/smart";
-
 // @ts-ignore
 import { ContractCallContext, ContractCallReturnContext, Multicall } from "@augurproject/ethereum-multicall";
 import { TransactionResponse, Web3Provider } from "@ethersproject/providers";
@@ -114,7 +113,7 @@ import { fetcherMarketsPerConfig, isIgnoredMarket, isIgnoreOpendMarket } from ".
 import { getDefaultPrice } from "./get-default-price";
 import {approveERC20Contract} from "../stores/use-approval-callback";
 import {
-  TrustedMarketFactoryV3ABI,
+  // TrustedMarketFactoryV3ABI,
   TrustedMarketFactoryV3Address,
   
   settlementAddress, 
@@ -147,20 +146,40 @@ import { Loan, InstrumentData} from "../types"
 import createIdentity from "@interep/identity"
 import createProof from "@interep/proof"
 
+import {TrancheFactory__factory, TLens__factory} from "supervault/typechain";
+
 const { parseBytes32String, formatBytes32String } = utils;
 
 const trimDecimalValue = (value: string | BN) => createBigNumber(value).decimalPlaces(6, 1).toFixed();
 
-interface initParams {
-  _want: string,
-  _instruments: string[],
-  _ratios: string[],
-  _junior_weight: string,
-  _promisedReturn: string,
-  _time_to_maturity: string,
-  vaultId: string
-}
+import tlensabi from "../data/TrustedMarketFactoryV3.json"; 
+import factoryabi from "../data/trancheFactoryabi.json"; 
+import tVaultabi from "../data/tVaultabi.json"; 
+import SpotPoolabi from "../data/SpotPoolabi.json"; 
+import tmasterabi from "../data/tranchemasterabi.json"; 
+import testercabi from "../data/testERCabi.json"; 
+import erc4626abi from "../data/erc4626abi.json"; 
+import leveragemoduleabi from "../data/leverageModuleabi.json"; 
+import splitterabi from "../data/splitterabi.json"; 
+
+// const tlens =  "0x651a1125C3b8458D20875EB15314122F65533B4e";
+const tlens = "0x185b337Ffb00Fb9B539Bf1502CCa8Adafe39A45c"
+const splitterFactory ="0xA688e7B287AaD4F3a02E140a69dbA8d480B49B74";
+const ammFactory=  "0x939006108eeF62FDa4272517BE704903B35d1C2c";
+const lendingPoolFactory = "0x2c150D6cA27Eb6FcC85751853a85D088D197e801" ;
+const lendTokenFactory = "0x60DfcA6f8D30BFA4290C0DAe16c946F79e1D0CAE";
+const tFactory =  "0xe10264EC2517441b9414Bb2e5c9F23942ba11BaE";
+const tMaster = "0xb2ba66410b5401aC4c42d1eff4c5F8362E7A8345" ;
+const testerc =  "0x6398A66a1c9e86294c645f264aDec5F2CF7b13cD";
+
+// splitterFactory  0xA688e7B287AaD4F3a02E140a69dbA8d480B49B74
+// ammFactory  0x939006108eeF62FDa4272517BE704903B35d1C2c
+// lendingPoolFactory  0x2c150D6cA27Eb6FcC85751853a85D088D197e801
+// lendTokenFactory 0x60DfcA6f8D30BFA4290C0DAe16c946F79e1D0CAE
+// tFactory  0xe10264EC2517441b9414Bb2e5c9F23942ba11BaE
+// tMaster  0xb2ba66410b5401aC4c42d1eff4c5F8362E7A8345
 const pp_ = BigNumber.from(10).pow(6);
+const pp = BigNumber.from(10).pow(18); 
 
 interface InitParams{
   _want: string; 
@@ -170,15 +189,545 @@ interface InitParams{
   _promisedReturn: BigNumber;
   _time_to_maturity: BigNumber; 
   vaultId: BigNumber; 
+  inceptionPrice: BigNumber; 
+}
+export async function approveUnderlying(
+  account: string, 
+  library: Web3Provider, 
+  vaultId: string="2", 
+  amount: number, 
+  ){
+  vaultId = "3"; 
+    amount = 500; 
+
+  const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+  const contracts = await factory.getContracts(vaultId); 
+  const want = new ethers.Contract(
+    contracts.param._want, testercabi, getSigner(library, account)
+    ); 
+  const scaledAmount = pp.mul(amount); // in shares so need to convert 
+  // await want.approve(tMaster, scaledAmount.mul(2) ); 
+  await want.approve(contracts.vault, scaledAmount.mul(2)); 
+
+}
+export async function mintTVault(
+  account: string, 
+  library: Web3Provider, 
+  vaultId: string="2", 
+  amount: number, 
+  ){
+  vaultId = "3"; 
+  amount = 500
+  const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+  const contracts = await factory.getContracts(vaultId); 
+  const want = new ethers.Contract(
+    contracts.param._want, testercabi, getSigner(library, account)
+    ); 
+  const scaledAmount = pp.mul(amount); // in shares so need to convert 
+  // await want.approve(tMaster, scaledAmount.mul(2) ); 
+  
+  const vault = new ethers.Contract(
+    contracts.vault, tVaultabi, getProviderOrSigner(library, account)
+    )
+    const approval = await want.allowance(account, vault.address); 
+    console.log('approval', approval.toString(), vault.address)
+    // await vault.setOracle(vault.address); 
+    const asset = await vault.asset(); 
+
+    // const testvault1 = new ethers.Contract(
+    //   testVault1Address_, erc4626abi, getProviderOrSigner(library, account)
+    //   ); 
+    // const testvault2 = new ethers.Contract(
+    //   testVault2Address_, erc4626abi, getProviderOrSigner(library, account)
+    //   );  
+    // const totalAsset1 = await testvault1.totalAssets(); 
+    // const totalAsset2 = await testvault2.totalAssets(); 
+    // const totalSupply1 = await testvault1.totalSupply(); 
+    // const totalSupply2 = await testvault2.totalSupply(); 
+
+    // console.log('assetsupplies', totalAsset1.toString(), 
+    //   totalAsset2.toString(), totalSupply1.toString(), totalSupply2.toString()); 
+    await vault.mint(scaledAmount, account, {gasLimit: 10000000}); 
+
+
+  // await vault.mint(scaledAmount); 
+  // await vault.approve(contracts.splitter, scaledAmount); 
+  // const bal = await want.balanceOf(account);
+  // const approval = await want.allowance(account, tMaster); 
+  // console.log('bal', bal.toString(), approval.toString()); 
+  // console.log("vaultad", contracts.vault, amount, scaledAmount, vaultId); 
+  // console.log('vaults', contracts.param._instruments);
+  // const tmaster = new ethers.Contract(
+  //   tMaster, tmasterabi, getSigner(library, account)
+  //   ); 
+  // await tmaster.mintTVault(vaultId, scaledAmount, {gasLimit: 10000000}); 
+//tokens 0xf4609fe4EDB554E3AaE6A262e5486F8580CAe72e 0xa9bDF9c65290e088c840b544d635F9E263caC0A7
+}
+export async function redeemTVault(
+  account: string, 
+  library: Web3Provider, 
+  vaultId: number, 
+  amount: number 
+  ){
+  const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+  const scaledAmount = pp.mul(amount); // in shares so need to convert 
+
+  // Todo redeemTVault
+  await tmaster.redeemToDebtVault(vaultId, scaledAmount);
+}
+export async function splitTranches(
+  account: string, 
+  library: Web3Provider, 
+  vaultId: number = 3, 
+  amount: number = 500
+  ){
+
+  const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+  const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+  const contracts = await factory.getContracts(vaultId); 
+  // const want = new ethers.Contract(
+  //   contracts.param._want, ERC20ABI, getProviderOrSigner(library, account)
+  //   ); 
+  const scaledAmount = pp.mul(amount); // in shares so need to convert 
+  // await want.approve(tMaster, scaledAmount.mul(2) ); 
+  
+  const vault = new ethers.Contract(
+    contracts.vault, tVaultabi, getProviderOrSigner(library, account)
+    )
+  // await vault.approve(tMaster, scaledAmount)
+  // await tmaster.splitTVault(vaultId, scaledAmount); 
+  const tokens = await tmaster.getTrancheTokens(vaultId)
+  console.log('tokens', tokens[0], tokens[1]); 
+
+}
+export async function mergeTranches(
+  account: string, 
+  library: Web3Provider, 
+  vaultId: number, 
+  junior_amount: number 
+  ){
+  const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+
+  await tmaster.mergeTVault(
+         vaultId, 
+        pp.mul(junior_amount)
+        );; 
+}
+export async function mintAndSplit(
+  account: string, 
+  library : Web3Provider, 
+  vaultId: number, 
+  amount: number
+  ){
+  const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+  const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+  const contracts = await factory.getContracts(vaultId); 
+  const want = new ethers.Contract(
+    contracts.param._want, ERC20ABI, getProviderOrSigner(library, account)
+    ); 
+  const scaledAmount = pp.mul(amount); // in shares so need to convert 
+  await want.approve(tMaster, scaledAmount.mul(2) ); 
+  await tmaster.mintAndSplit(vaultId, scaledAmount); 
+}
+
+export async function mergeAndRedeem(
+  account: string, 
+  library: Web3Provider, 
+  vaultId: number, 
+  junior_amount: number 
+
+  ){
+  const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+  await tmaster.mergeAndRedeem( vaultId,  junior_amount); 
+
+}
+
+export async function swapFromTranche(
+  account: string,
+  library: Web3Provider, 
+  vaultId: number, 
+  amount: number, 
+  toJunior: boolean, 
+  priceLimit: number
+  ){
+  const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+  // TODO approve 
+  //tmaster.getTrancheTokens(uint256 vaultId)
+    const scaled_amount = pp.mul(amount); 
+
+    const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+    const contracts = await factory.getContracts(vaultId); 
+
+    const amm = new ethers.Contract(
+      contracts.amm, SpotPoolabi,  getProviderOrSigner(library, account)
+      ); 
+    const tokens = await tmaster.getTrancheTokens(vaultId); 
+
+    const token = toJunior? tokens[1] : tokens[0];  
+    const tokenContract = new ethers.Contract(
+      token, ERC20ABI, getProviderOrSigner(library, account)
+      ) ;
+    await tokenContract.approve(contracts.amm, scaled_amount);
+    
+ await tmaster._swapFromTranche(
+      toJunior, pp.mul(8), pp.mul(priceLimit), 
+      vaultId, 0); 
+   
+}
+
+export async function faucetUnderlying(
+  account: string, 
+  library: Web3Provider, 
+  vaultId:number
+  ){
+    // const factory = new ethers.Contract(tFactory,
+    // factoryabi, getProviderOrSigner(library, account)
+    // );
+    // const contracts = await factory.getContracts("0"); 
+    // const want = new ethers.Contract(
+    // contracts.param._want, testercabi, getProviderOrSigner(library, account)
+    // ); 
+    // await want.faucet(); 
+
+ const tLens = new ethers.Contract(tlens,
+    tlensabi, getProviderOrSigner(library, account)
+    ) ; 
+  const num = await tLens.getNumVaults(tFactory);
+  const param = await tLens.getVaultParams( 
+    tFactory, 
+    vaultId); 
+
+
+  console.log('param', param); 
+  let params : VaultInfos = {"0":param}
+
+  // await tLens.getTrancheInfo(
+  //    tFactory, 
+  //   0
+  //   )
+//   console.log('ok')
+// await tLens.getTrancheInfo(
+//      tFactory, 
+//     1
+//     )
+//   console.log('ok')
+
+// await tLens.getTrancheInfo(
+//      tFactory, 
+//     2
+//     )
+    const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+    const contracts = await factory.getContracts(0); 
+    const vault = new ethers.Contract(
+    contracts.vault, tVaultabi, getProviderOrSigner(library, account)
+    )
+    const splitter = new ethers.Contract(contracts.splitter, splitterabi  , getProviderOrSigner(library, account)); 
+    const price = await splitter.underlying(); 
+    const sup = await vault.totalSupply(); 
+
+    const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+    const tokens = await tmaster.getTrancheTokens(0); 
+    const tokenContract1 = new ethers.Contract(
+      tokens[0], ERC20ABI, getProviderOrSigner(library, account)
+      ) ;
+     const tokenContract2 = new ethers.Contract(
+      tokens[1], ERC20ABI, getProviderOrSigner(library, account)
+      ) ;
+    const sup1 = await tokenContract1.totalSupply();
+    const sup2 = await tokenContract2.totalSupply();
+
+    console.log(vault.address, price, sup.toString(), sup1.toString(), sup2.toString()); 
+
+  console.log('ok')
+    await tLens.getCurrentMarkPrice(
+     tFactory, 
+     0
+    )
+  console.log('ok')
+  console.log('contract splitter', contracts.splitter); 
+  await tLens.getCurrentValuePrices(
+     tFactory, 
+     0
+    )
+    console.log('ok')
+
+
+
+await tLens.getTrancheInfo(
+     tFactory, 
+    0
+    )
+  console.log('ok')
+
+  const params_ = await tLens.getTrancheInfoBatch( tFactory); 
+
+
+
+  }
+export async function swapFromInstrument(
+  account: string,
+  library: Web3Provider, 
+  vaultId: number, 
+  amount: number, 
+  toJunior: boolean, 
+  priceLimit: number
+  ){
+    const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+
+    // Approve 
+    const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+    const contracts = await factory.getContracts(vaultId); 
+    const want = new ethers.Contract(
+    contracts.param._want, ERC20ABI, getProviderOrSigner(library, account)
+    ); 
+    const scaledAmount = pp.mul(amount); // in shares so need to convert 
+    await want.approve(tMaster, scaledAmount.mul(2) ); 
+
+    await tmaster._swapFromInstrument(
+      toJunior, 
+      scaledAmount, 
+      pp.mul(priceLimit), 
+      vaultId, 
+      0
+    ); 
+}
+
+//required abis: spotpool, leverage module 
+export async function doMakerTrade(
+  account: string,
+  library: Web3Provider, 
+  vaultId: number, 
+  amount: number, 
+  isAsk: boolean, 
+  price: number,
+  isReduce: boolean = false
+  ){
+    const scaled_amount = pp.mul(amount); 
+    vaultId = 3; 
+
+    const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+
+    const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+    const contracts = await factory.getContracts(vaultId); 
+
+    const amm = new ethers.Contract(
+      contracts.amm, SpotPoolabi,  getProviderOrSigner(library, account)
+      ); 
+    
+    const point = await amm.priceToPoint(pp.mul(price*100).div(100));
+
+    if(!isReduce){
+        const tokens = await tmaster.getTrancheTokens(vaultId); 
+
+        const token = isAsk? tokens[0] : tokens[1];  
+        const tokenContract = new ethers.Contract(
+          token, ERC20ABI, getProviderOrSigner(library, account)
+          ) ;
+        await tokenContract.approve(contracts.amm, scaled_amount);
+
+        await amm.makerTrade(!isAsk,scaled_amount, point ); 
+    }
+
+    else{
+      await amm.makerReduce(point, scaled_amount, isAsk )   
+
+    }
+}
+export async function addOrRemoveTrancheLiq(
+  account: string,
+  library: Web3Provider, 
+  vaultId: number, 
+  amount: number, 
+  priceLower: number, 
+  priceUpper: number, 
+  isRemove: boolean, 
+  ){
+    const scaled_amount = pp.mul(amount); 
+    vaultId = 3; 
+
+    const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+
+    const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+    const contracts = await factory.getContracts(vaultId); 
+
+
+    const tokens = await tmaster.getTrancheTokens(vaultId); 
+
+    // const token = isAsk? tokens[0] : tokens[1];  
+    const tokenContract = new ethers.Contract(
+      tokens[0], ERC20ABI, getProviderOrSigner(library, account)
+      ) ;
+    const tokenContract2 = new ethers.Contract(
+      tokens[1], ERC20ABI, getProviderOrSigner(library, account)
+      )
+    await tokenContract.approve(contracts.amm, scaled_amount);
+    await tokenContract2.approve(contracts.amm, scaled_amount);
+
+    // TODO get amount from static call 
+    // input is liquidity amount-> convert to trade/base token amount 
+    const amm = new ethers.Contract(
+      contracts.amm, SpotPoolabi,  getProviderOrSigner(library, account)
+      ); 
+    const pointLower = await amm.priceToPoint(pp.mul(priceLower*100).div(100))
+    const pointUpper = await amm.priceToPoint(pp.mul(priceUpper*100).div(100))
+    if(isRemove) await amm.provideLiquidity(pointLower, pointUpper, amount, 0); 
+    else await amm.provideLiquidity(pointLower, pointUpper, amount, 0); 
 }
 
 
+export async function claimMaker(
+  account: string, 
+  library: Web3Provider, 
+  vaultId: number,
+  price:number, 
+  buyTradeForBase: boolean 
+
+  ){
+  const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+  const contracts = await factory.getContracts(vaultId); 
+
+  const amm = new ethers.Contract(
+      contracts.amm, SpotPoolabi,  getProviderOrSigner(library, account)
+      ); 
+  const point =  await amm.priceToPoint(pp.mul(price*100).div(100))
+
+  await amm.makerClaim(
+         point, 
+         buyTradeForBase); 
+
+}
+export async function leverageSwap(
+  account: string, 
+  library: Web3Provider, 
+  borrowJunior: boolean, 
+  vaultId: number,
+  leverage: number, 
+  amount: number
+  ){
+    const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+    const contracts = await factory.getContracts(vaultId); 
+    const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+    const levMod = borrowJunior? new ethers.Contract(
+      contracts.cJunior, leveragemoduleabi, getProviderOrSigner(library, account))
+    :  new ethers.Contract(
+      contracts.cSenior, leveragemoduleabi, getProviderOrSigner(library, account)); 
+  
+    const tokens = await tmaster.getTrancheTokens(vaultId); 
+
+    // const token = isAsk? tokens[0] : tokens[1];  
+    const tokenContract = new ethers.Contract(
+      tokens[0], ERC20ABI, getProviderOrSigner(library, account)
+      ) ;
+    const tokenContract2 = new ethers.Contract(
+      tokens[1], ERC20ABI, getProviderOrSigner(library, account)
+      )
+    const scaled_amount = pp.mul(amount); 
+    await tokenContract.approve(levMod.address, scaled_amount);
+    await tokenContract2.approve(levMod.address, scaled_amount);
+
+    await levMod.swapWithLeverage(
+            scaled_amount, leverage, 0, vaultId, contracts.amm, 0); 
+}
+
+export async function supplyToPool(
+  account: string, 
+  library: Web3Provider,
+  supplyJunior: boolean, 
+  vaultId: number, 
+  amount: number
+  ){
+    const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
+    const contracts = await factory.getContracts(vaultId); 
+
+    const levMod = supplyJunior? new ethers.Contract(
+      contracts.cSenior, leveragemoduleabi, getProviderOrSigner(library, account))
+    :  new ethers.Contract(contracts.cJunior, leveragemoduleabi, getProviderOrSigner(library, account)); 
+    const tmaster = new ethers.Contract(
+    tMaster, tmasterabi, getProviderOrSigner(library, account)
+    ); 
+    const tokens = await tmaster.getTrancheTokens(vaultId); 
+    const tokenContract =  supplyJunior? new ethers.Contract(
+      tokens[0], ERC20ABI, getProviderOrSigner(library, account)
+      ): 
+    new ethers.Contract(
+      tokens[1], ERC20ABI, getProviderOrSigner(library, account)
+      )
+    const scaled_amount = pp.mul(amount); 
+
+    await tokenContract.approve(levMod.address, scaled_amount); 
+
+    await levMod.mint(scaled_amount); 
+
+  
+}
+export async function leverageUnswap(){}
+
+export async function withdrawFromPool(){}
+// finish contractcalls+ integrate+ UI+ test
+
+export async function routeTrade(){}
+export async function swapFromDebtVault(){}
+export async function redeemToDebtVault(){}
+export async function redeemFromDebtVault(){}
+export async function redeemByDebtVault(){}
+export async function unredeemDebtVault(){}
+
+export async function fillQueue(){}
+export async function mintTVaultFromVaults(){}
+const testVault1Address_ = "0x8c57E2d18642F29bE076b97fD7240CBe8b7777c0"; 
+const testVault2Address_ = "0x27dF2D016Be2A3499d7eB0466c64046f3d7347Ea"; 
 
 export async function createExampleSuperVault (
   account: string,
   library: Web3Provider,
-  _want: string = collateral_address, 
-  _instruments: string[] = [testVault1Address,testVault2Address ], 
+  _want: string = testerc, 
+  _instruments: string[] = [testVault1Address_,testVault2Address_ ], 
   _ratios: string[] = ["600000", "400000"], 
   _junior_weight: string = "300000", 
   _promisedReturn: string = "100000",
@@ -189,15 +738,28 @@ export async function createExampleSuperVault (
   const params = {} as InitParams; 
   params._want = _want; 
     params._instruments =  _instruments; 
-    params._ratios = [pp_.mul(7).div(10), pp_.mul(3).div(10)]; 
-    params._junior_weight = pp_.mul(3).div(10); 
-    params._promisedReturn = pp_.mul(1).div(10);
-    params._time_to_maturity = pp_.mul(10);
-    params.vaultId = pp_.mul(0);   // const _want = collateral_address; 
+    params._ratios = [pp.mul(7).div(10), pp.mul(3).div(10)]; 
+    params._junior_weight = pp.mul(3).div(10); 
+    params._promisedReturn = pp.mul(1).div(10);
+    params._time_to_maturity = pp.mul(0);
+    params.vaultId = pp.mul(0);   // const _want = collateral_address; 
+    params.inceptionPrice = pp; 
 
-    // const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
-    //     console.log('params', params)
+    const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    );
 
+   await factory.setTrancheMaster( tMaster); 
+   await factory.createVault(params,["d","d"], "description",{
+    gasLimit:10000000
+   }); 
+   const id = await factory.id() ;
+   console.log('id',  id.toString()-1); 
+  await factory.createSplitterAndPool(0, {gasLimit:10000000}); 
+   await factory.createLendingPools(0, {gasLimit:10000000});
+   console.log('created', id.toString()-1); 
+
+ // const cont = await factory.getContracts(0);
     // tx = await tFact.createVault(params, ["senior","junior"] ,"description");
   // try {
   //   const tFact = TrancheFactory__factory.connect(trancheFactoryAddress, getProviderOrSigner(library, account));
@@ -209,6 +771,120 @@ export async function createExampleSuperVault (
   // }
   return tx;
 }
+import {VaultInfos, UserInfo} from "../stores/vault-data"
+
+// export const getLiqPositions = async(){}
+export const getTrancheInfos = async (
+  provider: Web3Provider,
+  account: string,
+  vaultId: string = "0", 
+
+  // ignoreList: { [factory: string]: number[] },
+  // blocknumber: number
+): Promise<{ numVaults: string; blocknumber: number, vaultinfos:VaultInfos }> => {
+  const tLens = new ethers.Contract(tlens,
+    tlensabi, getProviderOrSigner(provider, account)
+    ) ; 
+  // const num = await tLens.getNumVaults(tFactory);
+  // const param = await tLens.getVaultParams( 
+  //   tFactory, 
+  //   vaultId); 
+
+
+  // console.log('param', param); 
+  // let params : VaultInfos = {"0":param}
+
+  const params_ = await tLens.getTrancheInfoBatch( tFactory); 
+  console.log('paramshere', params_); 
+  let init: {[index: string]: any} = {}
+  const result = params_.reduce((acc,cur)=>{
+    acc[cur.vaultId.toString()] = cur
+    return acc
+  }, init)
+
+
+  return {numVaults:"1", blocknumber: 0, vaultinfos: result }
+}
+
+export const getUserInfos = async(
+  provider: Web3Provider, 
+  account: string,
+  vaultId: string = "0", 
+
+  ) :Promise<UserInfo>=>{
+  const tLens = new ethers.Contract(tlens,
+    tlensabi, getProviderOrSigner(provider, account)
+    ) ; 
+
+    // const factory = new ethers.Contract(tFactory,
+    // factoryabi, getProviderOrSigner(provider, account)
+    // );
+    // const contracts = await factory.getContracts(vaultId); 
+    // console.log('ok', contracts); 
+
+    // const amm = new ethers.Contract(
+    //   contracts.amm, SpotPoolabi,  getProviderOrSigner(provider, account)
+    //   ); 
+    // const loggedpos = await amm.getLoggedPosition(account); 
+    // console.log('ok3', loggedpos); 
+    // const loggedlimit = await amm.getLimitLoggedPosition(account); 
+    // console.log('ok4', loggedlimit); 
+    // const pos = await tLens.getPositions(
+    //   tFactory, vaultId, account, contracts
+    //   );
+    // console.log('ok2', pos);
+
+  const info = await tLens.getUserInfo(
+    tFactory, account, vaultId); 
+  return info; 
+}
+export async function fetchSuperVault(
+  account: string, 
+  library: Web3Provider, 
+  vaultId: string = "0", 
+  ){
+  const tLens = new ethers.Contract("0x651a1125C3b8458D20875EB15314122F65533B4e",
+    tlensabi, getProviderOrSigner(library, account)
+    )
+  console.log(tLens, library, account)
+  const num = await tLens.getNumVaults(tFactory);
+  console.log('num', num.toString()); 
+  const param = await tLens.getVaultParams( 
+    tFactory, 
+    vaultId); 
+
+  console.log('param', param); 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+interface initParams {
+
+
+  _want: string,
+  _instruments: string[],
+  _ratios: string[],
+  _junior_weight: string,
+  _promisedReturn: string,
+  _time_to_maturity: string,
+  vaultId: string
+}
+
 
 
 export async function addTrancheLiquidity 
@@ -962,33 +1638,33 @@ export async function redeemPostAssessment(
 export async function verifyAddress(
   account: string,
   provider: Web3Provider
-): Promise<TransactionResponse> {
-  const wasmFilePath = "../static/semaphore.wasm";
-  const zkeyFilePath = "../static/semaphore_final.zkey";
+) {
+  // const wasmFilePath = "../static/semaphore.wasm";
+  // const zkeyFilePath = "../static/semaphore_final.zkey";
   
-  const signer = provider.getSigner(account)
+  // const signer = provider.getSigner(account)
   
-  const controller = Controller__factory.connect(controller_address, getProviderOrSigner(provider, account))
+  // const controller = Controller__factory.connect(controller_address, getProviderOrSigner(provider, account))
   
-  const identity = await createIdentity((message) => signer.signMessage(message), "Twitter")
+  // const identity = await createIdentity((message) => signer.signMessage(message), "Twitter")
   
-  const group = {
-    provider: "twitter",
-    name: "unrated"
-  }
+  // const group = {
+  //   provider: "twitter",
+  //   name: "unrated"
+  // }
 
-  const externalNullifier = 1
+  // const externalNullifier = 1
 
-  const snarkArtifacts = {
-    wasmFilePath,
-    zkeyFilePath
-  }
+  // const snarkArtifacts = {
+  //   wasmFilePath,
+  //   zkeyFilePath
+  // }
 
-  const signal_string = "twitter-unrated"
+  // const signal_string = "twitter-unrated"
 
-  const proof : any = await createProof(identity, group, externalNullifier, signal_string, snarkArtifacts)
+  // const proof : any = await createProof(identity, group, externalNullifier, signal_string, snarkArtifacts)
 
-  return controller.verifyAddress(proof.publicSignals.nullifierHash, proof.publicSignals.externalNullifier, proof.solidityProof)
+  // return controller.verifyAddress(proof.publicSignals.nullifierHash, proof.publicSignals.externalNullifier, proof.solidityProof)
 }
 
 export async function getVerificationStatus(
@@ -3501,7 +4177,6 @@ export const getMarketInfos = async (
   if (Object.keys(ignoreList).length === 0) {
     filteredMarkets = setIgnoreRemoveMarketList(filteredMarkets, ignoreList, loadtype);
   }
-  console.log('filteredMarkets', filteredMarkets); 
   const exchanges = Object.values(filteredMarkets as MarketInfos).reduce((p, m) => ({ ...p, [m.marketId]: m.amm }), {});
   return { markets: filteredMarkets, ammExchanges: exchanges, blocknumber: newBlocknumber };
 };

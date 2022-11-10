@@ -31,8 +31,8 @@ export const injected = new InjectedConnector({
 
 export const walletconnect = new WalletConnectConnector({
   rpc: { [DEFAULT_NETWORK_ID]: NETWORK_URL },
-  qrcode: true,
-  pollingInterval: 15000,
+  qrcode: true
+  //pollingInterval: 15000,
 });
 
 export const walletlink = new WalletLinkConnector({

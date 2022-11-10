@@ -1,0 +1,26 @@
+{
+  "name": "Augur | MMA Market Creation - ${MMA_MARKET_FACTORY}",
+  "initiators": [
+    {
+      "type": "web"
+    },
+    {
+      "type": "cron",
+      "params": {
+        "schedule": "CRON_TZ=UTC 06 14 * * 3"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "type": "augur-adapter",
+      "params": {
+        "sport": "mma",
+        "method": "create",
+        "startBuffer": 86400,
+        "daysInAdvance": 4,
+        "contractAddress": "${MMA_MARKET_FACTORY}"
+      }
+    }
+  ]
+}

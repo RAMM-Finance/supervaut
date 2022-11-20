@@ -13,6 +13,7 @@ import {
 // @ts-ignore
 import MetamaskIcon from "../ConnectAccount/assets/metamask.png";
 
+
 const { formatToken } = Formatter;
 const { getMaticUsdPrice } = ContractCalls;
 const { USDC, WMATIC_TOKEN_ADDRESS } = Constants;
@@ -47,6 +48,7 @@ export const AppViewStats = ({ small = false, liquidity = false, trading = false
       ),
     [isLogged, balances?.totalPositionUsd]
   );
+  const tvl = useMemo(() => handleValue(balances?.USDC?.usdValue/32345 || 0), [balances?.USDC?.usdValue])
   const usdValueUSDC = useMemo(() => handleValue(balances?.USDC?.usdValue/100000 || 0), [balances?.USDC?.usdValue]);
   const usdValueLP = useMemo(() => handleValue(balances?.USDC?.usdValue/300000 || 0), [
     balances?.totalCurrentLiquidityUsd,
@@ -65,14 +67,14 @@ export const AppViewStats = ({ small = false, liquidity = false, trading = false
 
   return (
     <div className={classNames(Styles.AppStats, { [Styles.small]: small, [Styles.full]: liquidity && trading, [Styles.LPOnly]: liquidity && !trading })}>
-      <ValueLabel large={!small} label="Current Vault APR" light={!isLogged} value={"13%"} small={small} />
-      {trading && (
-        <ValueLabel large={!small} label="My USDC Vault" light={!isLogged} value={usdValueUSDC} small={small} />
+      <ValueLabel large={!small} label="Total Value Locked" light={!isLogged} value={tvl} small={small} />
+      {(
+        <ValueLabel large={!small} label="My Portfolio Value" light={!isLogged} value={usdValueUSDC} small={small} />
       )}
       {/*{liquidity && <ValueLabel large={!small} small={small} label="Liquidity Positions" value={usdValueLP} />} */}
-      <ValueLabel large={!small} small={small} label="My Bond Positions" value={usdValueLP} />
+      <ValueLabel large={!small} small={small} label="Num Tvault Positions" value={1} />
 
-      <ValueLabel large={!small} small={small} label="Is Verified/REPU Score" value={isVerified} />
+      <ValueLabel large={!small} small={small} label="Total Num Tvaults" value={1} />
 
     </div>
   );
@@ -148,6 +150,40 @@ export const MaticAddMetaMaskToken = () => {
       customContent={
         <>
           <img alt="" height={12} src={MetamaskIcon} /> Add wMATIC to MetaMask
+        </>
+      }
+      action={() => AddToken()}
+    />
+  );
+};
+
+export const AddMetaMaskToken = ({address, name }) => {
+  const AddToken = async () => {
+    try {
+      // @ts-ignore
+      await ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: WMATIC_TOKEN_ADDRESS,
+            symbol: "WMATIC",
+            decimals: 18,
+            image: "https://polygonscan.com/token/images/wMatic_32.png",
+          },
+        },
+      });
+    } catch {
+      console.error("MetaMask not installed or locked.");
+    }
+  };
+
+  return (
+    <TinyThemeButton
+      customClass={Styles.AddMetaMaskToken}
+      customContent={
+        <>
+          <img alt="" height={12} src={MetamaskIcon} /> {"Add "}{name}{" to MetaMask"}
         </>
       }
       action={() => AddToken()}

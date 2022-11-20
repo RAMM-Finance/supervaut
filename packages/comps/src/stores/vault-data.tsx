@@ -64,8 +64,21 @@ interface VaultInfo extends InitParams{
   psu?: BigNumber; 
   pju?: BigNumber; 
 
+  tVaultAd?: string; 
+  seniorAd?: string; 
+  juniorAd?: string; 
+  blocknumber?: BigNumber; 
+  _creator?: string; 
+  _names?: string[]; 
+  _descriptions?: string;
 
+  isOracleAMM?: boolean ; 
+  oammAddress?: string; 
+  ammValue?: BigNumber; 
+  ammJuniorBal?: BigNumber; 
+  ammSeniorBal?: BigNumber; 
 }
+
 export const VAULTDATA_ACTIONS = {
   UPDATE_DATA_HEARTBEAT: "hb",
   UPDATE_TRANSACTIONS: "tx",

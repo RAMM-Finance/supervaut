@@ -23,6 +23,42 @@ import {
 } from '../constants';
 import { VerifiedAccount } from "./verified-account";
 
+// async function getTronWeb() {
+//   let tronWeb;
+//   if (window.tronLink.ready) {
+//     tronWeb = window.tronLink.tronWeb;
+//   } else {
+//     const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
+//     if (res.code === 200) {
+//       tronWeb = window.tronLink.tronWeb;
+//     }
+//   }
+//   return tronWeb;
+// }
+// declare global {
+//   interface Window {
+//     tronWeb?: any;
+//     tronLink?: any; 
+//   }
+// }
+// const getTronweb = ()=>{
+//     var obj = setInterval(async ()=>{
+//         if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+//             clearInterval(obj)
+//             console.log('tronweb', window.tronWeb.defaultAddress.base58)
+//             //document.write("Yes, catch it:",window.tronWeb.defaultAddress.base58)
+//         }
+//     }, 10)
+//     getTronWeb() ; 
+// }
+// const tronConnected=()=>{
+//   return window.tronLink.ready; 
+// }
+// const gettronAddress=()=>{
+//   return window.tronWeb.defaultAddress.base58; 
+// }
+
+
 
 const { parsePath, makePath } = PathUtils;
 const { MARKET, MARKETS, PORTFOLIO, LIQUIDITY, SIDEBAR_TYPES, TWELVE_HOUR_TIME, TWENTY_FOUR_HOUR_TIME } = Constants;
@@ -165,7 +201,9 @@ export const TopNav = () => {
       }
     }
   };
-
+  // const [tronWallet, setTronWallet] = useState(false); 
+  // const [connectbutton, setConnectButton] = useState(false); 
+  // const [tronAddress, setTronAddress] = useState(); 
   return (
     <section
       className={classNames(Styles.TopNav, {
@@ -177,11 +215,11 @@ export const TopNav = () => {
         {/*<LinkLogo />*/}
         {!isMobile && (
           <ol>
-            <li className={classNames({ [Styles.Active]: path === MARKETS })}>
+            {/*<li className={classNames({ [Styles.Active]: path === MARKETS })}>
               <Link placeholder="Markets" to={makePath(MARKETS)}>
                 Markets
               </Link>
-            </li>
+            </li> */}
             <li className={classNames({ [Styles.Active]: path === PORTFOLIO })}>
               <Link
                 onClick={(e) => {
@@ -201,7 +239,7 @@ export const TopNav = () => {
             </li>
            <li className={classNames({ [Styles.Active]: path === MINT })}>
               <Link to={makePath(MINT)} placeholder="Pools">
-                Mint
+                Trade
               </Link>
             </li>
           {/*  <li className={classNames({ [Styles.Active]: path === REDEEM })}>
@@ -228,7 +266,8 @@ export const TopNav = () => {
         )}
       </section>
       <section>
-        <ConnectAccount
+      {/*<SecondaryThemeButton text = {tronWallet? tronAddress : "Connect To Tron"} action={getTronweb}/>*/}
+       <ConnectAccount
           {...{
             updateLoginAccount: handleAccountUpdate,
             autoLogin,

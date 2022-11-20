@@ -37,6 +37,7 @@ import {
 } from "../constants";
 // import {MakerForm} from "maker-view"; 
 import { SmallDropdown } from "@augurproject/comps/build/components/common/selection";
+import { AddMetaMaskToken } from "../common/labels";
 
 const {useVaultDataStore} = NewStores; 
 
@@ -67,7 +68,8 @@ const {
   doMakerTrade, 
   faucetUnderlying, 
   approveUnderlying, 
-  splitTranches, addOrRemoveTrancheLiq, claimMaker, mergeTranches, getUserInfos
+  splitTranches, addOrRemoveTrancheLiq, claimMaker, mergeTranches, getUserInfos, fetchOracleData,
+  oammAddOrRemoveTrancheLiq
 } = ContractCalls;
 const {
 
@@ -131,35 +133,66 @@ const REMOVE_FOOTER_TEXT = `Removing liquidity may return shares; these shares m
 interface Positionprop {
   priceLower: string; 
   priceUpper: string; 
-  amount: string;
+  liquidity: string;
+  value?:string; 
+  isOracleAMM: boolean; 
 }
 const LiqPositionRow = (
   position
 : Positionprop) =>{
  return(
     <ul className={Styles.StatsRow}>
-
+      {!position.isOracleAMM &&
       <li>
         <span>Price of J/S Lower</span>
-        <span>{"3.2"}{"pjs"}</span>
-        <span>{formatDai(100000000/5/1000000 || "0.00").full}</span>
+        <span>{position.priceLower}{" p j/s"}</span> 
        {/* <span>{marketHasNoLiquidity ? "-" : formatDai(storedCollateral/1000000 || "0.00").full}</span> */}
-      </li>
-      <li>
+      </li>}
+      {!position.isOracleAMM && <li>
         <span>Price of J/S Upper</span>
-        <span>{formatDai(0.818 || "0.00").full}</span>
-        <span>{formatDai(0.818 || "0.00").full}</span>
+        <span>{position.priceUpper}{" p j/s"}</span> 
 
         {/*<span>{marketHasNoLiquidity ? "-" : formatLiquidity(amm?.liquidityUSD/10 || "0.00").full}</span> */}
+      </li>}
+      <li>
+        <span>Liquidity Shares</span>
+        <span>{position.liquidity}</span>
       </li>
       <li>
-        <span>Liquidity</span>
-        <span>{"Resolved"}</span>
+        <span>My Shares Value(in asset)</span>
+        <span>{position.value}</span>
       </li>
-
     </ul>
   )
 }
+
+
+interface LimitPositionprop {
+  price: number; 
+  amount: number; 
+  claimable: string;
+  isAsk: string; 
+}
+
+const LimitPositionRow = (
+  position
+: LimitPositionprop) =>{
+ return(
+    <ul className={Styles.StatsRow}>
+
+         <li>
+            <span>{position.isAsk=="false"? "Buy Junior(Sell Senior) Order":"Sell Junior(Buy Senior) Order" }</span>
+            <span>{"Claimable: "}{position.claimable }</span>
+            <span>{"Price of Junior/Senior: "}{position.price}</span>
+            <span>{"Amount: "}{position.amount}</span>
+
+            {/*<span>{marketHasNoLiquidity ? "-" : formatLiquidity(amm?.liquidityUSD/10 || "0.00").full}</span> */}
+          </li>
+     
+    </ul>
+  )
+}
+
 
 export const VaultLiquidityView = () => {
   const {
@@ -178,6 +211,9 @@ export const VaultLiquidityView = () => {
   const market = markets?.["0x1acf78fc24925f119c003f84c2ca0bd6acc45469-1"];
 
   const [selectedAction, setSelectedAction] = useState(actionType);
+  const [selectedActionMint, setSelectedActionMint] = useState(actionType); 
+  const [selectedActionMaker, setSelectedActionMaker] = useState(actionType); 
+
   // const [numTx, setNumTx] = useState(0); 
   const [isAmm, setIsAmm] = useState(true); 
 
@@ -191,6 +227,7 @@ export const VaultLiquidityView = () => {
   const [showMoreDetails, setShowMoreDetails] = useState(false);
 
   const [userInfos, setUserInfos ] = useState(); 
+  const [exchangeRate, setExchangeRate] = useState(); 
 
 
 
@@ -202,22 +239,36 @@ export const VaultLiquidityView = () => {
   const [amount, setAmount] = useState(
     isRemove ? shareBalance : isResetPrices ? maxWhackedCollateral?.collateralUsd : ""
   );
+  const [mintAmount, setmintAmount] = useState(""); 
+  const [makerAmount, setmakerAmount] = useState(""); 
 
-  const {blocknumber, numVaults, vaultinfos} = useVaultDataStore(); 
+  const {numVaults, vaultinfos} = useVaultDataStore(); 
   const vaultinfo = vaultinfos?.[marketId]
-  // useEffect(async ()=>{
-  // const infos = await getUserInfos( 
-  //   loginAccount.library, account, marketId); 
-  // setUserInfos(infos); 
-  // }, [vaultinfo])
-  // console.log('userinfos', userInfos); 
-
-  if (!vaultinfo) {
-    return <div className={classNames(Styles.MarketLiquidityView)}>Vault Not Found.</div>;
+  const {_want, _instruments, _ratios, _junior_weight, _promisedReturn, _time_to_maturity, inceptionPrice, 
+  pjs, psu, pju, pvu, curMarkPrice,tVaultAd, seniorAd, juniorAd, blocknumber, _creator, _names, 
+  _descriptions, isOracleAMM, oammAddress, ammValue, ammJuniorBal, ammSeniorBal} = vaultinfo || {};
+   
+  useEffect(async ()=>{
+  let infos; 
+  try{
+    infos = await getUserInfos( 
+    loginAccount.library, account, marketId); 
+    setUserInfos(infos); 
+  } catch(err){
+    console.log(err); 
   }
 
-  const {_want, _instruments, _ratios, _junior_weight, _promisedReturn, inceptionPrice, 
-  pjs, psu, pju, curMarkPrice} = vaultinfo
+  }, [blocknumber])
+
+  if (!vaultinfo || !userInfos) {
+    return <div className={classNames(Styles.MarketLiquidityView)}>Vault Not Found.</div>;
+  }
+  const{cJuniorBal, cSeniorBal, juniorBal, juniorDebt, 
+    limitPositions, liqPositions, seniorBal, seniorDebt, tVaultBal, 
+    UserLiquidityValue, UserLiquidityAmount, UserTrancheValue} = userInfos || {}; 
+
+
+
 
   const { categories } = market;
   const BackToLPPageAction = () => {
@@ -226,11 +277,24 @@ export const VaultLiquidityView = () => {
     });
     closeModal();
   };
-
+  function roundDown(number, decimals) {
+      decimals = decimals || 0;
+      return ( Math.floor( number * Math.pow(10, decimals) ) / Math.pow(10, decimals) );
+  }
 
   const notMint = false; 
   const ismint = true; 
-  const positions = [{"priceLower":"0", "priceUpper":"0", "amount": "0"}, ]
+
+  const oracleAMM = isOracleAMM; 
+  
+  const positions = liqPositions.length==0?[{"priceLower":"0", "priceUpper":"0", 
+  "liquidity": roundDown(UserLiquidityAmount.toString()/1e18,2), "value": roundDown(UserLiquidityValue.toString()/1e18,2)}, ]
+    : liqPositions
+
+  const limitPosition =limitPositions.length==0? [{"price": "0", "amount": "0", "claimable": "false", "isAsk": "false"}, ]
+    : limitPositions; 
+
+
   return (
     <div className={classNames(Styles.MarketLiquidityView)}>
 
@@ -245,7 +309,10 @@ export const VaultLiquidityView = () => {
         >
           <h4>Market Details</h4>
             <p>{"DETAILS"}</p>
-            <span>Underlying: {_want}</span>
+            <span>{"Underlying: "+ _names[0]}</span>
+            <span>{"Asset: "+ _names[1]}</span>
+
+            <span>{_descriptions}</span>
  
           
           {(
@@ -257,9 +324,10 @@ export const VaultLiquidityView = () => {
 
 
       <ul className={Styles.StatsRow}>
+
 <li>
             <span>Mark Price of J/S</span>
-            <span> {curMarkPrice.toString()/1e18}</span>
+            <span> {roundDown(curMarkPrice.toString()/1e18, 2)}</span>
            {/* <span>{marketHasNoLiquidity ? "-" : formatDai(storedCollateral/1000000 || "0.00").full}</span> */}
           </li>
           <li>
@@ -280,12 +348,12 @@ export const VaultLiquidityView = () => {
         </ul>
       <ul className={Styles.StatsRow}>
 <li>
-            <span>Vault Exchange Rate(P_VU)</span>
-            <span></span>
+            <span>Price of Asset/Underlying</span>
+            <span>{roundDown(pvu.toString()/1e18, 4)}</span>
           </li>
           <li>
-            <span>Vault(s) </span>
-            <span>{formatDai(0.818 || "0.00").full}</span>
+            <span>Junior Leverage </span>
+            <span>{roundDown(1/(_junior_weight/1e18), 2)}</span>
 
           </li>
           <li>
@@ -294,58 +362,76 @@ export const VaultLiquidityView = () => {
           </li>
 
           <li>
-            <span>Promised Return</span>
-            <span>{_promisedReturn/1e16}{"%"}</span>
+            <span>Senior Promised Return</span>
+           {/* <span>{(_promisedReturn-1e18)/1e16}{"% APR"}</span> */}
+            <span>{6.97}{"% APR"}</span>
+
           </li>
 
         </ul>
 
       <ul className={Styles.StatsRow}>
 <li>
-            <span>Inception Price</span>
-            <span>{formatDai(inceptionPrice/1e18|| "0.00").full}</span>
+            <span>Inception Price(in asset)</span>
+            <span>{inceptionPrice.toString()/1e18}</span>
            {/* <span>{marketHasNoLiquidity ? "-" : formatDai(storedCollateral/1000000 || "0.00").full}</span> */}
           </li>
           <li>
-            <span>Inception Time </span>
-            <span>{formatDai(0.818 || "0.00").full}</span>
+            <span>Inception Timestamp </span>
+            <span>{_time_to_maturity.toString()}</span>
 
             {/*<span>{marketHasNoLiquidity ? "-" : formatLiquidity(amm?.liquidityUSD/10 || "0.00").full}</span> */}
           </li>
           <li>
-            <span>Cur. Vaule Price</span>
-            <span>{"Resolved"}</span>
+            <span>Liquidity Provision APR</span>
+            <span>{"-"}</span>
           </li>
 
           <li>
-            <span>Cur. Mark Price</span>
-            <span>{formatDai(100000000/1000000 || "0.00").full}</span>
+            <span>Amm junior/senior reserves</span>
+            <span>{roundDown((ammJuniorBal.toString()/1e18), 2)}{"/"}{roundDown((ammSeniorBal.toString()/1e18), 2)}</span>
             {/*<span>{marketHasNoLiquidity ? "-" : formatLiquidity(amm?.liquidityUSD || "0.00").full}</span>*/}
           </li>
         {/*inception price,inception time, current value prices, current mark prices*/}
 
-        </ul>
+        </ul> 
      
 
         </div>   
-       
+                   <AddMetaMaskToken address ={_want} name={"tVault"}/>
+            <AddMetaMaskToken address ={_want} name={"Senior"}/>
+            <AddMetaMaskToken address ={_want} name={"Junior"}/>
+        {oracleAMM   && <AddMetaMaskToken address ={_want} name={"AMM LP shares"}/>}
+
        {/* <SwapMenu/> */}
-        <MarketTitleArea {...{ ...market, timeFormat }} />
+        {/*<MarketTitleArea {...{ ...market, timeFormat }} />*/}
+
       </MarketLink>
       <h4> Mint Split Redeem Merge</h4>
-        <LiquidityForm {...{vaultinfo, market, selectedAction, setSelectedAction, BackToLPPageAction, amount, setAmount, ismint }} />
+
+        <LiquidityForm {...{vaultinfo, market, selectedAction, setSelectedAction, 
+          BackToLPPageAction, amount, setAmount, mintAmount, setmintAmount, ismint,
+          selectedActionMint, setSelectedActionMint,oracleAMM}} />
+
         <h5>My Vault {"&"} Tranche Positions</h5>
+
       <ul className={Styles.StatsRow}>
           <li>
+
             <span>My tVault Qty</span>
-            <span>{formatDai(100000000/1000000 || "0.00").full}</span>
+            <span> {roundDown(tVaultBal.toString()/1e18,2)}</span>
             {/*<span>{marketHasNoLiquidity ? "-" : formatLiquidity(amm?.liquidityUSD || "0.00").full}</span>*/}
           </li>
           <li><span>My Senior/Junior Qty</span>
-            <span>{formatDai(100000000/4.2/1000000  || "0.00").full}</span>
+            <span>{roundDown(seniorBal.toString()/1e18, 2)}{"/"}{roundDown(juniorBal.toString()/1e18,2)}</span> 
+            </li>
+          <li><span>My Senior/Junior Value</span>
+            <span>{roundDown(seniorBal.mul(psu).toString()/1e18/1e18, 2)}{"/"}
+            {roundDown(juniorBal.mul(pju).toString()/1e18/1e18,2)}</span> 
+
             </li>
             <li> <span>My Senior/Junior Debt</span>
-            <span>{formatDai(100000000/4.2/1000000  || "0.00").full}</span>
+            <span>{seniorDebt.toString()/1e18}{"/"}{juniorDebt.toString()/1e18}</span> 
           </li>
 
 
@@ -365,39 +451,26 @@ export const VaultLiquidityView = () => {
 
         </div>
       <LiquidityForm {...{ vaultinfo, market, selectedAction, setSelectedAction, 
-        BackToLPPageAction, amount, setAmount,notMint  }} />
+        BackToLPPageAction, amount, setAmount,notMint, oracleAMM }} />
       {selectedAction !== MINT_SETS && selectedAction !== RESET_PRICES && <LiquidityWarningFooter />}
-      <h5>Liquidity Positions</h5>
+      <h5>My Liquidity Positions</h5>
         {positions.map((position)=> (
           <LiqPositionRow priceLower={position.priceLower} priceUpper={position.priceUpper} 
-          amount={position.amount} />
+          liquidity={position.liquidity} value = {position.value} isOracleAMM = {oracleAMM}/>
           )) }
-          <h4>Create Bids/Asks</h4>
+          
+      {!oracleAMM && <h4>Create Bids/Asks</h4>}
+      {!oracleAMM && <MakerForm vaultinfo = {vaultinfo} market={market} selectedAction={selectedActionMaker}
+      setSelectedAction={setSelectedActionMaker} BackToLPPageAction={BackToLPPageAction}
+      amount = {makerAmount} setAmount={setmakerAmount}
+      /> }
+      {!oracleAMM && <h5>Limit Order Positions</h5>}
+      {!oracleAMM && limitPosition.map((position)=>(
+      <LimitPositionRow price={position.price.toString()/1e18} amount={position.amount.toString()/1e18} 
+      claimable= {position.claimable?"true": "false"} isAsk = {position.isAsk? "true": "false"}/>
+        ))}
 
-      <MakerForm {...{ vaultinfo, market, selectedAction, setSelectedAction, BackToLPPageAction, amount, setAmount }} />
-      <h5>Limit Order Positions</h5>
 
-      <ul className={Styles.StatsRow}>
-   
-          <li>
-            <span>Bids</span>
-            <span>{"Claimable: false"}</span>
-
-            <span>{"Price: "}{"3.2"}{"pjs"}</span>
-            <span>{"Amount: "}{formatDai(100000000/5/1000000 || "0.00").full}</span>
-           {/* <span>{marketHasNoLiquidity ? "-" : formatDai(storedCollateral/1000000 || "0.00").full}</span> */}
-          </li>
-          <li>
-            <span>Asks</span>
-            <span>{"Claimable: false"}</span>
-            <span>{"Price: "}{"3.2"}{"pjs"}</span>
-            <span>{"Amount: "}{formatDai(100000000/5/1000000 || "0.00").full}</span>
-
-            {/*<span>{marketHasNoLiquidity ? "-" : formatLiquidity(amm?.liquidityUSD/10 || "0.00").full}</span> */}
-          </li>
-     
-
-        </ul>
 
 
 
@@ -447,8 +520,7 @@ const BackBar = ({ BackToLPPageAction, selectedAction, setSelectedAction, setAmo
 const LiquidityWarningFooter = () => (
   <article className={Styles.LiquidityWarningFooter}>
     <span>
-      {WarningIcon} Remove liquidity before the winning outcome is known. Failure to do so can result in a total loss of
-      funds.
+      {WarningIcon} Adding Liquidity will automatically split your asset, and you may receive split tranches when you redeem liquidity shares
     </span>
   </article>
 );
@@ -462,6 +534,11 @@ interface LiquidityFormProps {
   amount: string;
   setAmount: (string) => void;
   ismint?: boolean; 
+  mintAmount?: string;
+  setmintAmount?: (string) => void;
+  selectedActionMint?: string; 
+   setSelectedActionMint?: Function; 
+   oracleAMM?: boolean; 
 }
 
 const orderMinAmountsForDisplay = (
@@ -479,7 +556,7 @@ const getCreateBreakdown = (breakdown, market, balances, isRemove = false, isMin
         svg: null,
       })),
     {
-      label: isRemove ? "USDC" : isMint? "tVault": "LP tokens",
+      label: isRemove ? "Estimated Underlying Qty" : isMint? "Estimated tVault Qty": "LP tokens",
       value: `${
         breakdown?.amount
           ? isRemove
@@ -487,7 +564,8 @@ const getCreateBreakdown = (breakdown, market, balances, isRemove = false, isMin
             : formatSimpleShares(breakdown.amount).formatted
           : "-"
       }`,
-      svg: isRemove ? USDCIcon : null,
+     // svg: isRemove ? USDCIcon : null,
+      svg: null
     },
   ];
   const userRewards = balances?.pendingRewards?.[market.marketId];
@@ -542,8 +620,19 @@ const LiquidityForm = ({
   BackToLPPageAction,
   amount,
   setAmount,
-  ismint
+  ismint,
+  mintAmount, 
+  setmintAmount, 
+  selectedActionMint, 
+  setSelectedActionMint, 
+  oracleAMM
 }: LiquidityFormProps) => {
+  if(ismint){
+    amount = mintAmount; 
+    setAmount = setmintAmount; 
+    selectedAction = selectedActionMint
+    setSelectedAction = setSelectedActionMint 
+  }
   const {
     account,
     balances,
@@ -592,12 +681,12 @@ const LiquidityForm = ({
     : isResetPrices
     ? ApprovalAction.RESET_PRICES
     : ApprovalAction.ADD_LIQUIDITY;
-  const approvedMain = useApprovalStatus({
-    cash,
-    amm,
-    refresh: blocknumber,
-    actionType: approvalActionType,
-  });
+  // const approvedMain = useApprovalStatus({
+  //   cash,
+  //   amm,
+  //   refresh: blocknumber,
+  //   actionType: approvalActionType,
+  // });
   const isApprovedMain = true//approvedMain === ApprovalState.APPROVED;
   //const isApproved = isRemove ? isApprovedMain && isApprovedToTransfer : isApprovedMain;
   const isApproved = true; 
@@ -705,7 +794,7 @@ const LiquidityForm = ({
         {/*<SecondaryThemeButton text={"Split tVault"} action={()=>doSplit(account, loginAccount, vaultId, 0)}/>*/}
         {/*<SecondaryThemeButton text={"faucet"} action={()=>doFaucet(account, loginAccount, vaultId)}/>*/}
 
-        {!isMint && !ismint&& <AmountInput
+        {(!oracleAMM && !isMint && !ismint)&& <AmountInput
           heading="Price Lower"
           ammCash={cash}
           updateInitialAmount={(priceLower) => setPriceLower(priceLower)}
@@ -716,7 +805,7 @@ const LiquidityForm = ({
           updateAmountError={() => null}
           error={hasAmountErrors}
         />  }      
-        {!isMint && !ismint&& <AmountInput
+        {(!oracleAMM && !isMint && !ismint)&& <AmountInput
           heading="Price Upper"
           ammCash={cash}
           updateInitialAmount={(priceUpper) => setPriceUpper(priceUpper)}
@@ -741,11 +830,11 @@ const LiquidityForm = ({
         <div className={Styles.PricesAndOutcomes}>
           <span className={Styles.PriceInstructions}>
            {/* <span>{mustSetPrices ? "Set the Price" : "Current Prices"}</span> */}
-            <span>{"Current Tranche Token Prices"}</span>
-            <span>(between 0.02 - 1.0). Total price of all outcomes must add up to 1.</span>
+            {(oracleAMM && !isMint && !ismint)&&  <span>{"Current Liquidity Provision Info"}</span>}
+            {(oracleAMM && !isMint && !ismint)&&  <span>{"LP Share Exchange Rate(from asset): "}{}</span>}
+            {(oracleAMM && !isMint && !ismint)&& <span>{"Liquidity Reserve Ratio "}</span>}
+            {/*(oracleAMM && !isMint && !ismint)&& <span>{"Current Liquidity Share Exchange Rate"}</span>*/}
 
-
-            {/*<span>You will receive </span> */}
           </span>
 
           <OutcomesGrid
@@ -796,7 +885,7 @@ const LiquidityForm = ({
               />
             )*/}
             {/*<span>{isRemove ? "Remove All Liquidity" : "You'll Receive"}</span> */}
-            <InfoNumbers infoNumbers={infoNumbers} />
+            {!ismint && <InfoNumbers infoNumbers={infoNumbers} />}
           </div>
           <div className={Styles.ActionButtons}>
             {!isApproved && (
@@ -820,7 +909,7 @@ const LiquidityForm = ({
           
 
           {ismint && isMint&& <SecondaryThemeButton text={"Merge"} 
-            action={() => doSplit(account, loginAccount, vaultId, amount)}/>}
+            action={() => doMerge(account, loginAccount, vaultId, amount)}/>}
             {!isMint&& !ismint &&<SecondaryThemeButton
               action={() =>
                 setModal({
@@ -832,23 +921,36 @@ const LiquidityForm = ({
                     : isResetPrices
                     ? "Reset Prices"
                     : "Add Liquidity",
-                  transactionButtonText: isRemove ? "Remove" : isMint ? "Mint" : isResetPrices ? "Reset Prices" : "Add",
+                  transactionButtonText: isRemove ? "Remove" : "Add",
                   transactionAction: ({ onTrigger = null, onCancel = null }) => {
-                    onTrigger && onTrigger();
-                    confirmLiqAction({
-                        
-                      account, loginAccount, vaultId, 
-                      amount, priceLower, priceUpper, 
-                      isRemove , 
-  
-                      afterSigningAction: BackToLPPageAction,
-             
-                    });
+                    if (oracleAMM){
+                        console.log("confirm?")
+                        onTrigger && onTrigger();
+
+                        confirmOAMMLiqAction({
+                        account, loginAccount, vaultId, 
+                                            amount, isRemove }
+                        )
+                    }
+                    else{
+
+                      onTrigger && onTrigger();
+                      confirmLiqAction({
+                          
+                        account, loginAccount, vaultId, 
+                        amount, priceLower, priceUpper, 
+                        isRemove , 
+    
+                        afterSigningAction: BackToLPPageAction,
+               
+                      });
+                    }
+
                   },
-                  targetDescription: {
-                    market,
-                    label: isMint ? "Market" : "Pool",
-                  },
+                  // targetDescription: {
+                  //   market,
+                  //   label: isMint ? "Market" : "Pool",
+                  // },
                   footer: isRemove
                     ? {
                         text: REMOVE_FOOTER_TEXT,
@@ -860,9 +962,10 @@ const LiquidityForm = ({
                           heading: "What you are removing:",
                           infoNumbers: [
                             {
-                              label: "Pooled USDC",
-                              value: `${formatCash(liquidityUSD, USDC).full}`,
-                              svg: USDCIcon,
+                              label: "Liquidity Shares ",
+                            //  value: `${formatCash(liquidityUSD, USDC).full}`,
+                              value: `${formatCash(amount, USDC).full}`
+                              //svg: USDCIcon,
                             },
                           ],
                         },
@@ -916,7 +1019,7 @@ const LiquidityForm = ({
                             {
                               label: "amount",
                               value: `${formatCash(amount, USDC).full}`,
-                              svg: USDCIcon,
+                              // value: am
                             },
                           ],
                         },
@@ -936,9 +1039,10 @@ const LiquidityForm = ({
                       ],
                 })
               }
-              disabled={!isApproved || inputFormError !== ""}
+              //disabled={!isApproved || inputFormError !== ""}
              // error={buttonError}
-             // text={inputFormError === "" ? (buttonError ? buttonError : actionButtonText) : inputFormError}
+              //text={inputFormError === "" ? (buttonError ? buttonError : actionButtonText) : inputFormError}
+              text={actionButtonText}
               // subText={
               //   buttonError === INVALID_PRICE
               //     ? lessThanMinPrice
@@ -995,8 +1099,7 @@ const doApprove = async(
 const doSplit = async(
   account, loginAccount, vaultId, amount 
   )=>{
-  vaultId = 3; 
-  amount = 500; 
+ 
   await splitTranches(account, loginAccount.library, vaultId, amount); 
  
 }
@@ -1004,6 +1107,16 @@ const doMerge = async(
   account, loginAccount, vaultId, amount 
   )=>{
   await mergeTranches(account, loginAccount.library, vaultId, amount); 
+
+}
+const confirmOAMMLiqAction = async({
+  account, loginAccount, vaultId, amount, isRemove, 
+  afterSigningAction = () => {}
+})=> {
+  await oammAddOrRemoveTrancheLiq(
+    account, loginAccount.library, vaultId, amount, isRemove).then((response)=>{
+      afterSigningAction(); 
+     });; 
 
 }
 const confirmLiqAction = async ({
@@ -1040,159 +1153,6 @@ const confirmLiqAction = async ({
   }
 //};
 
-const confirmAction = async ({
-  addTransaction,
-  breakdown,
-  setBreakdown,
-  account,
-  loginAccount,
-  market,
-  amount,
-  onChainFee,
-  outcomes,
-  cash,
-  amm,
-  isRemove,
-  estimatedLpAmount,
-  afterSigningAction = () => {},
-  onCancel = null,
-  isMint,
-  isResetPrices,
-}) => {
-  const valid = checkConvertLiquidityProperties(account, market.marketId, amount, onChainFee, outcomes, cash);
-  if (!valid) {
-    setBreakdown(defaultAddLiquidityBreakdown);
-  }
-  if (isRemove) {
-    doRemoveLiquidity(amm, loginAccount?.library, amount, breakdown.minAmountsRaw, account, cash, market?.hasWinner)
-      .then((response) => {
-        const { hash } = response;
-        addTransaction({
-          hash,
-          chainId: loginAccount.chainId,
-          seen: false,
-          status: TX_STATUS.PENDING,
-          from: account,
-          addedTime: new Date().getTime(),
-          message: `Remove Liquidity`,
-          marketDescription: `${market?.title} ${market?.description}`,
-        });
-        afterSigningAction();
-      })
-      .catch((error) => {
-        onCancel && onCancel();
-        console.log("Error when trying to remove AMM liquidity: ", error?.message);
-        addTransaction({
-          hash: "remove-liquidity-failed",
-          chainId: loginAccount.chainId,
-          seen: false,
-          status: TX_STATUS.FAILURE,
-          from: account,
-          addedTime: new Date().getTime(),
-          message: `Remove Liquidity`,
-          marketDescription: `${market?.title} ${market?.description}`,
-        });
-      });
-  } else if (isMint) {
-    await mintCompleteSets(amm, loginAccount?.library, amount, account)
-      .then((response) => {
-        const { hash } = response;
-        addTransaction({
-          hash,
-          chainId: loginAccount.chainId,
-          from: account,
-          seen: false,
-          status: TX_STATUS.PENDING,
-          addedTime: new Date().getTime(),
-          message: `Mint Complete Sets`,
-          marketDescription: `${market?.title} ${market?.description}`,
-        });
-        afterSigningAction();
-      })
-      .catch((error) => {
-        onCancel && onCancel();
-        console.log("Error when trying to Mint Complete Sets: ", error?.message);
-        addTransaction({
-          hash: `mint-sets-failed${Date.now()}`,
-          chainId: loginAccount.chainId,
-          from: account,
-          seen: false,
-          status: TX_STATUS.FAILURE,
-          addedTime: new Date().getTime(),
-          message: `Mint Complete Sets`,
-          marketDescription: `${market?.title} ${market?.description}`,
-        });
-      });
-  } else if (isResetPrices) {
-    await doResetPrices(loginAccount.library, account, amm)
-      .then((response) => {
-        const { hash } = response;
-        addTransaction({
-          hash,
-          chainId: loginAccount.chainId,
-          from: account,
-          seen: false,
-          status: TX_STATUS.PENDING,
-          addedTime: new Date().getTime(),
-          message: `Reset Prices`,
-          marketDescription: `${market?.title} ${market?.description}`,
-        });
-        afterSigningAction();
-      })
-      .catch((error) => {
-        onCancel && onCancel();
-        console.log("Error when trying to Reset Prices: ", error?.message);
-        addTransaction({
-          hash: `reset-prices-failed-${Date.now()}`,
-          chainId: loginAccount.chainId,
-          from: account,
-          seen: false,
-          status: TX_STATUS.FAILURE,
-          addedTime: new Date().getTime(),
-          message: `Reset Prices`,
-          marketDescription: `${market?.title} ${market?.description}`,
-        });
-      });
-  } else {
-    await addLiquidityPool(
-      account,
-      loginAccount?.library,
-      amm,
-      cash,
-      amount,
-      estimatedLpAmount,
-      unOrderOutcomesForDisplay(outcomes)
-    )
-      .then((response) => {
-        const { hash } = response;
-        addTransaction({
-          hash,
-          chainId: loginAccount.chainId,
-          from: account,
-          seen: false,
-          status: TX_STATUS.PENDING,
-          addedTime: new Date().getTime(),
-          message: `Add Liquidity`,
-          marketDescription: `${market?.title} ${market?.description}`,
-        });
-        afterSigningAction();
-      })
-      .catch((error) => {
-        onCancel && onCancel();
-        console.log("Error when trying to add AMM liquidity: ", error?.message);
-        addTransaction({
-          hash: `add-liquidity-failed${Date.now()}`,
-          chainId: loginAccount.chainId,
-          from: account,
-          seen: false,
-          status: TX_STATUS.FAILURE,
-          addedTime: new Date().getTime(),
-          message: `Add Liquidity`,
-          marketDescription: `${market?.title} ${market?.description}`,
-        });
-      });
-  }
-};
 
 const MIN_LIQUIDITY_ADD_AMOUNT = "200.00";
 
@@ -1245,9 +1205,9 @@ const useErrorValidation = ({ isRemove, outcomes, amount, actionType, isGrouped,
     hasAmountErrors,
   };
 };
-//maker buy, maker sell, maker reduce buy, maker reduce sell, maker claim buy, maker claim sell
-//maker buy junior->senior maker buy senior from junior 
-//maker sell junior->senior maker 
+
+
+
 const MakerForm = ({
   vaultinfo,
   market, 
@@ -1281,7 +1241,7 @@ const MakerForm = ({
   const [asset, setAsset] = useState(0); 
     const [price, setPrice] = useState(0); 
 
-  const [chosenCash, updateCash] = useState<string>(USDC);
+  const [chosenCash, updateCash] = useState<string>("underlying");
   const [breakdown, setBreakdown] = useState(defaultAddLiquidityBreakdown);
   const [estimatedLpAmount, setEstimatedLpAmount] = useState<string>("0");
   const tradingFeeSelection = TRADING_FEE_OPTIONS[2].id;
@@ -1304,12 +1264,12 @@ const MakerForm = ({
     : isResetPrices
     ? ApprovalAction.RESET_PRICES
     : ApprovalAction.ADD_LIQUIDITY;
-  const approvedMain = useApprovalStatus({
-    cash,
-    amm,
-    refresh: blocknumber,
-    actionType: approvalActionType,
-  });
+  // const approvedMain = useApprovalStatus({
+  //   cash,
+  //   amm,
+  //   refresh: blocknumber,
+  //   actionType: approvalActionType,
+  // });
   const isApprovedMain = true//approvedMain === ApprovalState.APPROVED;
   //const isApproved = isRemove ? isApprovedMain && isApprovedToTransfer : isApprovedMain;
   const isApproved = true; 
@@ -1334,15 +1294,15 @@ const MakerForm = ({
   const {vaultId} = vaultinfo; 
 
   const selectionDropDownProps = {
-      defaultValue: "Senior", 
+      defaultValue: "Sell Senior->Buy Junior(Bids)", 
       onChange: (val) => setAsset(val),
       options: [
           {
-              label: "Senior->Junior",
+              label: "Sell Senior->Buy Junior(Bids)",
               value: "0"
           },
           {
-              label: "Junior->Senior",
+              label: "Sell Junior->Buy Senior(Asks)",
               value: "1"
           },
       ]
@@ -1449,8 +1409,9 @@ const MakerForm = ({
           error={hasAmountErrors}
         />        
   
-        <SecondaryThemeButton text={"Place Order"} 
-        action={()=> doMaker(account, loginAccount, vaultId, amount, asset, price)}/>
+        {!isMint&& 
+          <SecondaryThemeButton text={"Place Order"} 
+        action={()=> doMaker(account, loginAccount, vaultId, amount, asset, price)}/>}
         <div className={Styles.PricesAndOutcomes}>
           <span className={Styles.PriceInstructions}>
            {/* <span>{mustSetPrices ? "Set the Price" : "Current Prices"}</span> */}

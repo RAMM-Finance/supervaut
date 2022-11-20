@@ -30,6 +30,8 @@ import { MarketInfo } from "@augurproject/comps/build/types";
 // import {VaultInfos} from "@augurproject/comps/"
 import BigNumber from "bignumber.js";
 import { SubCategoriesFilter } from "../markets/markets-view";
+import tlens from "./tlensabi.json"; 
+
 const {useVaultDataStore} = NewStores; 
 interface InitParams{
   _want: string; 
@@ -41,6 +43,27 @@ interface InitParams{
   vaultId: BigNumber; 
   inceptionPrice: BigNumber; 
 }
+
+
+
+
+const DropDownCategories = [
+  {
+    label: "All Markets",
+    value: "All Markets",
+    disabled: false,
+  },
+  {
+    label: "Yield Assets",
+    value: "Yield Assets",
+    disabled: false,
+  },
+   {
+    label: "Spot Assets",
+    value: "Spot Assets",
+    disabled: false,
+  },
+];
 
 interface VaultInfo extends InitParams{
   // vaultId: string; 
@@ -58,7 +81,7 @@ const {
   MarketCardComps: { MarketTitleArea },
   ButtonComps: { PrimaryThemeButton, SecondaryThemeButton },
 } = Components;
-const { canAddLiquidity, getMaticUsdPrice, createExampleSuperVault} = ContractCalls;
+const { canAddLiquidity, getMaticUsdPrice, createExampleSuperVault, fetchOracleData} = ContractCalls;
 const {
   DateUtils: { getMarketEndtimeDate },
   Formatter: { formatApy, formatCash, formatToken },
@@ -79,6 +102,11 @@ const confirmCreate = async ({account, loginAccount}) => {
 
   await createExampleSuperVault(account, loginAccount.library); 
 };
+
+const fetchOracle = async ({account, loginAccount}) =>{
+  await fetchOracleData(account, loginAccount.library, "0"); 
+
+}
 
 
 const applyFiltersAndSort = (
@@ -388,6 +416,20 @@ export const tokenAmountInUnitsToBigNumber = (amount: BigNumber, decimals: numbe
     return amount.div(decimalsPerToken);
 };
 
+const VaultTitleArea = ({
+  title = null,
+  description = null,
+  startTimestamp = null
+}: any) => (
+  <span>
+    <span>
+      {!!title && <span>{title}</span>}
+      {!!description && <span>{description}</span>}
+    </span>
+    <span>{`StartTime: ` }{"11/10/2022"}</span>
+  </span>
+);
+
 const VaultCard = ({ vaultinfo }: any): React.FC => {
   const {
     settings: { timeFormat },
@@ -400,16 +442,14 @@ const VaultCard = ({ vaultinfo }: any): React.FC => {
     const {actions: {setModal},} = useAppStatusStore(); 
 
   const { transactions } = useDataStore();
-  const{
-    inceptionPrice, 
-    vaultId, 
-    _instruments, 
-    _junior_weight, 
-    _promisedReturn,
-    _ratios, 
-    _want
-  } = vaultinfo; 
 
+  const {_want, _instruments, _ratios, _junior_weight, _promisedReturn, _time_to_maturity, inceptionPrice, 
+  pjs, psu, pju, pvu, curMarkPrice,tVaultAd, seniorAd, juniorAd, blocknumber, _creator, _names, 
+  _descriptions, isOracleAMM, oammAddress, ammValue, ammJuniorBal, ammSeniorBal, vaultId} = vaultinfo;
+  function roundDown(number, decimals) {
+      decimals = decimals || 0;
+      return ( Math.floor( number * Math.pow(10, decimals) ) / Math.pow(10, decimals) );
+  }
 
  
   const [price, setPrice] = useState(1);
@@ -418,7 +458,7 @@ const VaultCard = ({ vaultinfo }: any): React.FC => {
   const userHasLiquidity = false; 
   const isfinal = false; 
   const hasRewards = true; 
-  console.log('vaultinfo here', vaultinfo, Number(vaultId.toString()), _promisedReturn.toString());
+  const f = vaultId.toString() == 1; 
   useEffect(() => {
     let isMounted = true;
     getMaticUsdPrice(loginAccount?.library).then((p) => {
@@ -435,20 +475,25 @@ const VaultCard = ({ vaultinfo }: any): React.FC => {
         [Styles.Final]: false,
       })}
     >
+
       <MarketLink id={vaultId} dontGoToMarket={true}>
         {/*<CategoryIcon {...{ "categories" }} />
         <MarketTitleArea {...{ ...market, timeFormat }} />*/}
+
+    <p style={{ fontWeight: 'bold' }}> {"VaultId: "}{vaultId.toString()+" "}{_names[1]}{f?"-ETH":_names[0]}{" tVault"}</p>
 
       </MarketLink>
       <button onClick={() => setExpanded(!expanded)}>
        {/* <CategoryIcon {...{ categories }} />
         <MarketTitleArea {...{ ...market, timeFormat }} /> */}
+
       </button>
-      <span>{ "-"}</span>
-      <span>{"-"}</span>
-      <span>{"-"}</span>
-      <span>
-        {"$0.00"}
+
+      <span style={{ fontWeight: 'bold' }}>{"Underlying: "}{f? "-ETH": _names[0]}</span>
+      <span style={{ fontWeight: 'bold' }}>{"Fixed Return: "}{f?(_promisedReturn-1e18)/1e16: 6.97}{"%"}{"APR"}</span>
+      <span style={{ fontWeight: 'bold' }}>{"Jun. Leverage: "}{roundDown(1/(_junior_weight/1e18), 2)}</span>
+      <span style={{ fontWeight: 'bold' }}>
+        {"TVL:"}{"$0.00"}
         {/* {userHasLiquidity && <span>Init Value {formatCash(userHasLiquidity?.usdValue, currency).full}</span>} */}
       </span>
       <span>
@@ -468,7 +513,7 @@ const VaultCard = ({ vaultinfo }: any): React.FC => {
           </span>
           <span>(${"10"})</span>
         </div>
-      { 
+      {/* 
         <SecondaryThemeButton
             text="AtomicBuy/Sell"
             small
@@ -488,7 +533,7 @@ const VaultCard = ({ vaultinfo }: any): React.FC => {
           } 
           />
          
-        }
+        */}
 { 
         <SecondaryThemeButton
             text="Trade"
@@ -576,6 +621,9 @@ const VaultCard = ({ vaultinfo }: any): React.FC => {
   );
 };
 const LiquidityView = () => {
+
+ 
+
       const {blocknumber, numVaults, vaultinfos} = useVaultDataStore(); 
     console.log('block', blocknumber, numVaults ); 
     let notnull = false; 
@@ -644,27 +692,32 @@ const LiquidityView = () => {
   return (
     <div className={Styles.LiquidityView}>
       <AppViewStats small liquidity />
-      <AvailableLiquidityRewards balance={rewardBalance} />
-      <MaticAddMetaMaskToken />
-      <h1>Explore LP Opportunties</h1>
+      {/*<SecondaryThemeButton text={"oracle"} action = {()=>fetchOracle({account, loginAccount})}/>*/}
+      {/*<SecondaryThemeButton text = {tronWallet? tronAddress : "Connect To Tron"} action={getTronweb}/>
+      <SecondaryThemeButton text = {"contractcall"} action={tronContract}/>*/}
+
+      {/*<AvailableLiquidityRewards balance={rewardBalance} />
+      <MaticAddMetaMaskToken />*/}
+
+      <h1>tVault Markets</h1>
       <p>
-        Add Market liquidity to earn fees and rewards. <a href=".">Learn more →</a>
+        Trade Tranches or Add Liquidity to earn fees, <a href="...">Learn more →</a>
       </p>
       <ul>
         <SquareDropdown
           onChange={(value) => {
             updatePoolsViewSettings({ primaryCategory: value, subCategories: [] });
           }}
-          options={categoryItems}
+          options={DropDownCategories}
           defaultValue={primaryCategory}
         />
-        <SquareDropdown
+        {/*<SquareDropdown
           onChange={(value) => {
             updatePoolsViewSettings({ marketTypeFilter: value });
           }}
           options={MARKET_TYPE_OPTIONS}
           defaultValue={marketTypeFilter}
-        />
+        />*/}
         <label html-for="toggleOnlyUserLiquidity">
           <ToggleSwitch
             id="toggleOnlyUserLiquidity"
@@ -685,10 +738,15 @@ const LiquidityView = () => {
       />
       <section>
         <article>
-            <button onClick={() => confirmCreate(  {account, loginAccount})}>CreateMarket</button> 
+        <span>tVaults</span>
 
-          <span>Market</span>
-          {Object.keys(POOL_SORT_TYPES).map((sortType) => (
+          {/*<span>Invest Asset</span>
+          <span>Underlying Asset</span>
+          <span>Promised Return </span>
+          <span>Junior Leverage</span>
+          <span>TVL</span> */}
+
+          {/*Object.keys(POOL_SORT_TYPES).map((sortType) => (
             <SortableHeaderButton
               {...{
                 sortType,
@@ -698,14 +756,14 @@ const LiquidityView = () => {
                 key: `${sortType}-sortable-button`,
               }}
             />
-          ))}
+          )) */}
           <span />
         </article>
-        <section>
+        {/*<section>
           {sliceByPage(filteredMarkets, page, PAGE_LIMIT).map((market: MarketInfo) => (
             <LiquidityMarketCard market={market} key={market.marketId} />
           ))}
-        </section>
+        </section> */}
         <section>
           {notnull && Object.values(vaultinfos).map((vaultinfo: VaultInfo) => (
             <VaultCard vaultinfo={vaultinfo} key={vaultinfo.vaultId} />

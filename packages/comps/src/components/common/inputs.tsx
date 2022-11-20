@@ -76,6 +76,7 @@ export interface AmountInputProps {
   ammCash: Cash;
   isBuy?: boolean;
   disabled?: boolean;
+  balance_?: string; 
 }
 
 export const AmountInput = ({
@@ -92,6 +93,7 @@ export const AmountInput = ({
   ammCash,
   isBuy = true,
   disabled = false,
+  balance_ = null, 
 }: AmountInputProps) => {
   const { isLogged } = useAppStatusStore();
   const currencyName = chosenCash;
@@ -121,7 +123,7 @@ export const AmountInput = ({
     >
       <span>{heading}</span>
       <span onClick={setMax}>
-        {isLogged && (
+        {isLogged && balance_ && (
           <>
             <span>balance:</span>{" "}
             {isBuy ? formatCash(maxValue, ammCash?.name).full : formatSimpleShares(maxValue).roundedFormatted}
@@ -135,7 +137,7 @@ export const AmountInput = ({
           [Styles.Error]: error,
         })}
       >
-        <span>{chosenCash !== SHARES && prepend && symbol}</span>
+        <span>{}</span>
         <input
           type="number"
           onChange={(e) => {
@@ -153,7 +155,7 @@ export const AmountInput = ({
         {!!currencyName && chosenCash !== SHARES && !showCurrencyDropdown && (
           <span className={Styles.CurrencyLabel}>
             {/*icon*/} 
-            {"dbUSDC"}
+            {""}
           </span>
         )} 
         {chosenCash === SHARES && !showCurrencyDropdown && <span className={Styles.SharesLabel}>Shares</span>}

@@ -2,71 +2,29 @@
   {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "_want",
-            "type": "address"
-          },
-          {
-            "internalType": "address[]",
-            "name": "_instruments",
-            "type": "address[]"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "_ratios",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "_junior_weight",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "_promisedReturn",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "inceptionTime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "vaultId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "inceptionPrice",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "oracleAMM",
-            "type": "bool"
-          }
-        ],
-        "internalType": "struct TrancheFactory.InitParams",
-        "name": "param",
-        "type": "tuple"
-      },
-      {
         "internalType": "address",
-        "name": "_creator",
+        "name": "_baseToken",
         "type": "address"
       },
       {
-        "internalType": "string[]",
-        "name": "_names",
-        "type": "string[]"
+        "internalType": "address",
+        "name": "_tradeToken",
+        "type": "address"
       },
       {
-        "internalType": "string",
-        "name": "_descriptions",
-        "type": "string"
+        "internalType": "address",
+        "name": "asset_address",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "splitter_address",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vault_address",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -204,19 +162,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "PRICE_PRECISION",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -278,19 +223,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "assetName",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -300,6 +232,30 @@
     ],
     "name": "balanceOf",
     "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "assets",
+        "type": "uint256"
+      }
+    ],
+    "name": "computeAssetsReturned",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
       {
         "internalType": "uint256",
         "name": "",
@@ -349,19 +305,6 @@
   },
   {
     "inputs": [],
-    "name": "creator",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "decimals",
     "outputs": [
       {
@@ -374,8 +317,14 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "delta",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "who",
+        "type": "address"
+      }
+    ],
+    "name": "denomintateInAsset",
     "outputs": [
       {
         "internalType": "uint256",
@@ -412,20 +361,7 @@
   },
   {
     "inputs": [],
-    "name": "descriptions",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getJuniorWeight",
+    "name": "dust",
     "outputs": [
       {
         "internalType": "uint256",
@@ -438,12 +374,12 @@
   },
   {
     "inputs": [],
-    "name": "getNames",
+    "name": "fees",
     "outputs": [
       {
-        "internalType": "string[]",
+        "internalType": "uint256",
         "name": "",
-        "type": "string[]"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -451,7 +387,20 @@
   },
   {
     "inputs": [],
-    "name": "getPromisedReturn",
+    "name": "getCurPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentReserveRatio",
     "outputs": [
       {
         "internalType": "uint256",
@@ -466,100 +415,29 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "pastNBlock",
-        "type": "uint256"
-      }
-    ],
-    "name": "getStoredReturnData",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
+        "name": "pjs",
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "internalType": "bool",
+        "name": "isSenior",
+        "type": "bool"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "junior_weight",
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getUnderlying",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "inceptionPrice",
+    "name": "getPTV",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "pTv",
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "inceptionTime",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "instruments",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "junior_weight",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -590,19 +468,6 @@
       }
     ],
     "name": "maxMint",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "maxOracleEntries",
     "outputs": [
       {
         "internalType": "uint256",
@@ -652,19 +517,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "minEntries",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -691,25 +543,6 @@
   {
     "inputs": [],
     "name": "name",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "names",
     "outputs": [
       {
         "internalType": "string",
@@ -780,6 +613,19 @@
     "name": "permit",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "precision",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -859,51 +705,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "promisedReturn",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "queryExchangeRateOracle",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "ratios",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -935,24 +736,17 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "newOracle",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "_fees",
+        "type": "uint256"
       },
       {
-        "internalType": "bool",
-        "name": "_assetIsErc20",
-        "type": "bool"
+        "internalType": "uint256",
+        "name": "_withdrawalFee",
+        "type": "uint256"
       }
     ],
-    "name": "setExchangeRateOracle",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "storeExchangeRate",
+    "name": "setFees",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -971,47 +765,37 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "totalAssetOracle",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "recipient",
         "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "toJunior",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "takerTrade",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "totalAssets",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalAssetsERC4626",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalAssetsOracle",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1086,32 +870,6 @@
       }
     ],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "underlyingName",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "want",
-    "outputs": [
-      {
-        "internalType": "contract ERC20",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {

@@ -19,7 +19,7 @@ export interface ModalConfirmTransactionProps {
     heading: string;
     infoNumbers: Array<InfoNumberType>;
   }>;
-  targetDescription: {
+  targetDescription?: {
     market: MarketInfo;
     label: string;
     subLabel?: string;
@@ -34,7 +34,7 @@ const ModalConfirmTransaction = ({
   transactionButtonText,
   transactionAction,
   breakdowns = [],
-  targetDescription,
+  targetDescription = null,
   title,
   footer = null,
 }: ModalConfirmTransactionProps) => {
@@ -43,7 +43,11 @@ const ModalConfirmTransaction = ({
     <section className={Styles.ModalConfirmTransaction}>
       <Header title={title} />
       <main>
-        <TargetDescription {...{ targetDescription }} />
+        <section className={Styles.TargetDescription}>
+        <span>{"Confirm Modal"}</span>
+        {/*<span>{"Confirm "}</span>*/}
+        </section>
+        {/*<TargetDescription {...{ targetDescription }} />*/}
         {breakdowns.length > 0 &&
           breakdowns.map(({ heading, infoNumbers }) => (
             <section key={`${heading}-breakdown`}>

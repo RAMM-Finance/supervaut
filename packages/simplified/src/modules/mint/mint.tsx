@@ -16,7 +16,7 @@ import {
   getCategoryIconLabel,
   ContractCalls,
   useUserStore,
-
+  NewStores, 
 } from "@augurproject/comps";
 import { SmallDropdown } from "@augurproject/comps/build/components/common/selection";
 
@@ -33,6 +33,7 @@ import { FailedX } from "@augurproject/comps/build/components/common/icons";
 import { ValueLabel } from "@augurproject/comps/build/components/common/labels";
 // import { RiSettings3Fill } from 'react-icons/ri'
 
+const {useVaultDataStore} = NewStores; 
 
 const {
   SelectionComps: { SquareDropdown , ToggleSwitch},
@@ -100,7 +101,6 @@ await mergeTranches(account, loginAccount.library, vaultId, amount);
 const doSwap = async(
   account, loginAccount, vaultId, amount,asset1, asset2, leverage
   )=>{
-  vaultId = 3
   console.log('amount', amount); 
   if (asset1 == 0 && asset2 ==1){
     if(leverage>1){
@@ -127,7 +127,7 @@ const doSwap = async(
       true,vaultId, leverage, amount )
      return
     }
-    
+    console.log('here'); 
 
     await swapFromTranche(
     account,
@@ -156,8 +156,10 @@ const doSwap = async(
 
 
 }
+
 export const MintView= () => {
-  
+    const {blocknumber, numVaults, vaultinfos} = useVaultDataStore(); 
+
   const { account, loginAccount } = useUserStore();
   const [ amount, setAmount ] = useState("");
   const [loading, setLoading] = useState(true);
@@ -177,12 +179,17 @@ export const MintView= () => {
   const [asset, setAsset] = useState("0"); 
   const [asset_, setAsset_] = useState("1"); 
   const [leverage, setLeverage] = useState("");
+  const [vaultId, setVaultId] = useState(""); 
   const handleSubmit = async (e: any) => { 
     await mintVaultDS(account, loginAccount.library, amount, true);
   }
 
-  const vaultId = 0; 
-
+  function isInt(value) {
+  return !isNaN(value) && 
+         parseInt(value) == value && 
+         !isNaN(parseInt(value, 10))};
+  const vaultIdIsInt = (vaultinfos && isInt(vaultId) && vaultId < Object.keys(vaultinfos).length); 
+ 
 
   const selectionDropDownProps = {
       defaultValue: "Senior", 
@@ -236,18 +243,15 @@ export const MintView= () => {
   const bal = 3; 
   return (
     <div
+    style={{ 'justifyContent':'space-between'}}
       className={classNames(Styles.MintView, {
       })}
     >
       <SEO {...MARKETS_LIST_HEAD_TAGS} />
       <NetworkMismatchBanner />
 
-      <VaultPrice balance={"3"} />
-      <VaultPrice balance={"3"} />
 
-
-
-           
+      {/*<VaultPrice balance={"3"} />*/}
 
      <div className = {styleMint.wrapper}>  
         <div className = {formStyles.MintForm}>
@@ -256,14 +260,14 @@ export const MintView= () => {
           </div>
 
          {/* <ValueLabel large={true} label="Vault Token Balance" value={balance} /> */}
-          <div style={{ 'padding-left': '1.5rem', 'padding-right': '1.5rem' }}>
+          <div style={{ 'paddingLeft': '1.5rem', 'paddingRight': '1.5rem' }}>
   
           <div className={inputStyles.AmountInput}>
           <div className="text-sm font-bold">{receive ? 'J-S' : 'From'}</div>
 
 
             <div className={inputStyles.AmountInputField}>
-              <span>$</span>
+              <span></span>
               <input 
                 type="text"
                 placeholder="0.0"
@@ -272,10 +276,10 @@ export const MintView= () => {
                   if (/^\d*\.?\d*$/.test(e.target.value)) {
                     if(oppositeDown){
                       setAmount(e.target.value);
-                      setOppositeAmount(e.target.value*2); 
+                      //setOppositeAmount(e.target.value*2); 
                     }
                     else{
-                      setOppositeAmount(e.target.value * 2); 
+                      //setOppositeAmount(e.target.value * 2); 
                     }
                   }
                 }}
@@ -323,12 +327,12 @@ export const MintView= () => {
           small
         />  */ }            
             
-          <div style={{ 'padding-left': '1.5rem', 'padding-right': '1.5rem' }}>
+          <div style={{ 'paddingLeft': '1.5rem', 'paddingRight': '1.5rem' }}>
           <div className={inputStyles.AmountInput}>
                     <div className="text-sm font-bold">{receive ? 'J-S' : 'To'}</div>
 
             <div className={inputStyles.AmountInputField}>
-              <span>$</span>
+              <span></span>
               <input 
                 type="text"
                 placeholder="0.0"
@@ -359,9 +363,9 @@ export const MintView= () => {
           </div>
         </div>
 
-       <div style={{ 'padding-left': '5rem', 'padding-right': '5rem'}}>
+       <div style={{ 'paddingLeft': '5rem', 'paddingRight': '5rem'}}>
           <div className={inputStyles.AmountInput}>
-                  <div className="text-sm font-bold">{"Input Leverage"}</div>
+                  <div className="text-sm font-bold">{"Enter Leverage"}</div>
 
             <div className={inputStyles.AmountInputField}>
             <span></span>
@@ -385,16 +389,39 @@ export const MintView= () => {
               {"Max Leverage"}</span></button>
 
             </div>
+                  <div className="text-sm font-bold">{"Enter VaultId"}</div>
+    <div 
+     className={inputStyles.AmountInputField}>
+              <span></span>
+              <input 
+                type="text"
+                placeholder="Vault Id here"
+                value={vaultId }
+                onChange={(e) => {
+                  if (/^\d*\.?\d*$/.test(e.target.value)) {
+                    setVaultId(e.target.value)
+                    
+                  }
+                }}
+              />
+      
 
+              
+            </div>
           
 
           </div>
         </div> 
- 
-        <div style={{  'padding-left': '1.5rem', 'padding-right': '1.5rem' }} >
+        {/*<Prim text={vaultIdIsInt? "Confirm": "Invalid Vauld Id"} 
+        action={() => doSwap(account, loginAccount, vaultId, amount, asset, asset_, leverage)}
+        disabled={vaultIdIsInt}/>*/}
+
+        <div style={{  'paddingLeft': '1.5rem', 'paddingRight': '1.5rem' }} >
           <button onClick={() => doSwap(account, loginAccount, vaultId, amount, asset, asset_, leverage)} 
-          className={buttonStyles.SimplifiedActionButton}>
-          &nbsp; &nbsp;  &nbsp; <span>Confirm</span> &nbsp; &nbsp; &nbsp; 
+          className={buttonStyles.SimplifiedActionButton}
+          disabled={!vaultIdIsInt}>
+
+          &nbsp; &nbsp;  &nbsp; <span>{vaultIdIsInt? "Confirm": "Invalid Vauld Id"}</span> &nbsp; &nbsp; &nbsp; 
           </button>
         </div>
         

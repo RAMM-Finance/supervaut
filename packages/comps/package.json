@@ -35,7 +35,8 @@
     "react-router-dom": "^5.2.0",
     "react-tooltip": "^4.2.11",
     "semver": "7.3.2",
-    "supervault": "1.0.3"
+    "supervault": "1.0.3",
+    "tronweb": "^4.4.0"
   },
   "scripts": {
     "check": "tsc --noEmit",

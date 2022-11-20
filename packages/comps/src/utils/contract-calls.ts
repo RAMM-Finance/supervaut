@@ -161,36 +161,28 @@ import testercabi from "../data/testERCabi.json";
 import erc4626abi from "../data/erc4626abi.json"; 
 import leveragemoduleabi from "../data/leverageModuleabi.json"; 
 import splitterabi from "../data/splitterabi.json"; 
+import oracleabi from "../data/oracle.json"; 
+import oracleAMMabi from "../data/oracleAMM.json"; 
 
 // const tlens =  "0x651a1125C3b8458D20875EB15314122F65533B4e";
-const tlens = "0x185b337Ffb00Fb9B539Bf1502CCa8Adafe39A45c"
-const splitterFactory ="0xA688e7B287AaD4F3a02E140a69dbA8d480B49B74";
-const ammFactory=  "0x939006108eeF62FDa4272517BE704903B35d1C2c";
-const lendingPoolFactory = "0x2c150D6cA27Eb6FcC85751853a85D088D197e801" ;
-const lendTokenFactory = "0x60DfcA6f8D30BFA4290C0DAe16c946F79e1D0CAE";
-const tFactory =  "0xe10264EC2517441b9414Bb2e5c9F23942ba11BaE";
-const tMaster = "0xb2ba66410b5401aC4c42d1eff4c5F8362E7A8345" ;
+const tlens = "0xF10320CA88e0a80173Be5d7Efa0AED49278Cef2E"
+const oammfactory = "0xbc8fbC67b0dE49E3640022605164BC74e402cfe1"
+const splitterFactory ="0x5aa04071fA2561f7299a96CEE3d8123F9Cd0044E";
+const ammFactory=  "0x6ea12dC4FB3dC77a118C833ffCA3204E2e548929";
+const lendingPoolFactory = "0xBcB1494840300CdA5180Af295a840960b29467D0" ;
+const lendTokenFactory = "0x7AA4748FC0Ba078c2deB58fA68653d190F7012a9";
+const tFactory =  "0x250929a4B8aC0bD7c0C68F0fA3A82d7B4Bf9436a";
+const tMaster = "0x5B02b894A9bC2955A7495Ac4F9d068f64aB3Ef32" ;
 const testerc =  "0x6398A66a1c9e86294c645f264aDec5F2CF7b13cD";
+const ethcpioracle = "0x6b091be9D9A0d29e6CBAABB8134b0cCf9a76fc30"; 
 
-// splitterFactory  0xA688e7B287AaD4F3a02E140a69dbA8d480B49B74
-// ammFactory  0x939006108eeF62FDa4272517BE704903B35d1C2c
-// lendingPoolFactory  0x2c150D6cA27Eb6FcC85751853a85D088D197e801
-// lendTokenFactory 0x60DfcA6f8D30BFA4290C0DAe16c946F79e1D0CAE
-// tFactory  0xe10264EC2517441b9414Bb2e5c9F23942ba11BaE
-// tMaster  0xb2ba66410b5401aC4c42d1eff4c5F8362E7A8345
+
+
 const pp_ = BigNumber.from(10).pow(6);
 const pp = BigNumber.from(10).pow(18); 
+const precision = 1000000; 
 
-interface InitParams{
-  _want: string; 
-  _instruments: string[]; 
-  _ratios: BigNumber[];
-  _junior_weight: BigNumber;
-  _promisedReturn: BigNumber;
-  _time_to_maturity: BigNumber; 
-  vaultId: BigNumber; 
-  inceptionPrice: BigNumber; 
-}
+
 export async function approveUnderlying(
   account: string, 
   library: Web3Provider, 
@@ -218,8 +210,7 @@ export async function mintTVault(
   vaultId: string="2", 
   amount: number, 
   ){
-  vaultId = "3"; 
-  amount = 500
+  // vaultId = "3"; 
   const factory = new ethers.Contract(tFactory,
     factoryabi, getProviderOrSigner(library, account)
     );
@@ -228,15 +219,15 @@ export async function mintTVault(
     contracts.param._want, testercabi, getSigner(library, account)
     ); 
   const scaledAmount = pp.mul(amount); // in shares so need to convert 
-  // await want.approve(tMaster, scaledAmount.mul(2) ); 
+  await want.approve(contracts.vault, scaledAmount.mul(2) ); 
   
   const vault = new ethers.Contract(
     contracts.vault, tVaultabi, getProviderOrSigner(library, account)
     )
-    const approval = await want.allowance(account, vault.address); 
-    console.log('approval', approval.toString(), vault.address)
-    // await vault.setOracle(vault.address); 
-    const asset = await vault.asset(); 
+    // const approval = await want.allowance(account, vault.address); 
+    // console.log('approval', approval.toString(), vault.address)
+  //   // await vault.setOracle(vault.address); 
+  //   const asset = await vault.asset(); 
 
     // const testvault1 = new ethers.Contract(
     //   testVault1Address_, erc4626abi, getProviderOrSigner(library, account)
@@ -279,7 +270,7 @@ export async function redeemTVault(
   const scaledAmount = pp.mul(amount); // in shares so need to convert 
 
   // Todo redeemTVault
-  await tmaster.redeemToDebtVault(vaultId, scaledAmount);
+  await tmaster.redeemTVault(vaultId, scaledAmount);
 }
 export async function splitTranches(
   account: string, 
@@ -304,10 +295,10 @@ export async function splitTranches(
   const vault = new ethers.Contract(
     contracts.vault, tVaultabi, getProviderOrSigner(library, account)
     )
-  // await vault.approve(tMaster, scaledAmount)
-  // await tmaster.splitTVault(vaultId, scaledAmount); 
-  const tokens = await tmaster.getTrancheTokens(vaultId)
-  console.log('tokens', tokens[0], tokens[1]); 
+  await vault.approve(tMaster, scaledAmount)
+  await tmaster.splitTVault(vaultId, scaledAmount); 
+  // const tokens = await tmaster.getTrancheTokens(vaultId)
+  // console.log('tokens', tokens[0], tokens[1]); 
 
 }
 export async function mergeTranches(
@@ -322,7 +313,7 @@ export async function mergeTranches(
 
   await tmaster.mergeTVault(
          vaultId, 
-        pp.mul(junior_amount)
+        pp.mul(junior_amount*precision).div(precision)
         );; 
 }
 export async function mintAndSplit(
@@ -368,11 +359,9 @@ export async function swapFromTranche(
   toJunior: boolean, 
   priceLimit: number
   ){
-  const tmaster = new ethers.Contract(
+    const tmaster = new ethers.Contract(
     tMaster, tmasterabi, getProviderOrSigner(library, account)
     ); 
-  // TODO approve 
-  //tmaster.getTrancheTokens(uint256 vaultId)
     const scaled_amount = pp.mul(amount); 
 
     const factory = new ethers.Contract(tFactory,
@@ -380,9 +369,6 @@ export async function swapFromTranche(
     );
     const contracts = await factory.getContracts(vaultId); 
 
-    const amm = new ethers.Contract(
-      contracts.amm, SpotPoolabi,  getProviderOrSigner(library, account)
-      ); 
     const tokens = await tmaster.getTrancheTokens(vaultId); 
 
     const token = toJunior? tokens[1] : tokens[0];  
@@ -390,10 +376,39 @@ export async function swapFromTranche(
       token, ERC20ABI, getProviderOrSigner(library, account)
       ) ;
     await tokenContract.approve(contracts.amm, scaled_amount);
-    
- await tmaster._swapFromTranche(
-      toJunior, pp.mul(8), pp.mul(priceLimit), 
+
+    //     var result = await tmaster.callStatic._swapFromInstrument(
+    // toJunior, scaled_amount, pp.mul(priceLimit), 
+    //   vaultId, 0
+    // ) ;
+
+    // console.log("swap result",  result.toString()); 
+
+
+    if(!contracts.param.oracleAMM){
+      await tmaster._swapFromTranche(
+      toJunior, scaled_amount, pp.mul(priceLimit), 
       vaultId, 0); 
+    }
+    else{
+      console.log('swap amount', scaled_amount.toString(), toJunior, vaultId); 
+      const amm = new ethers.Contract(contracts.amm, oracleAMMabi, getProviderOrSigner(library, account)); 
+      const result = await amm.callStatic.takerTrade( account, toJunior, scaled_amount);  
+      console.log('swap result', toJunior, vaultId, result.toString()); 
+      const junior = new ethers.Contract(
+      tokens[0], ERC20ABI, getProviderOrSigner(library, account)
+      ) ;
+      const juniorbal = await junior.balanceOf(contracts.amm); 
+      const seniorbal = await tokenContract.balanceOf(account); 
+
+      console.log('balances', juniorbal.toString(), seniorbal.toString(), scaled_amount.toString()); 
+
+      await amm.takerTrade( account, toJunior, scaled_amount,  {gasLimit:10000000}); 
+     
+    }
+
+
+
    
 }
 
@@ -507,18 +522,29 @@ export async function swapFromInstrument(
     factoryabi, getProviderOrSigner(library, account)
     );
     const contracts = await factory.getContracts(vaultId); 
-    const want = new ethers.Contract(
-    contracts.param._want, ERC20ABI, getProviderOrSigner(library, account)
+    const vault = new ethers.Contract(
+    contracts.vault, tVaultabi, getProviderOrSigner(library, account)
     ); 
-    const scaledAmount = pp.mul(amount); // in shares so need to convert 
-    await want.approve(tMaster, scaledAmount.mul(2) ); 
+    const scaledAmount = pp.mul(amount*precision).div(precision); // in shares so need to convert 
+    
+    await vault.approve(tMaster, scaledAmount.mul(2) ); 
+    // console.log('amount', scaledAmount.toString(), amount, toJunior, vaultId)
+    // const result = await tmaster.callStatic._swapFromInstrument(
+    //   toJunior, 
+    //   scaledAmount, 
+    //   0,      
+    //   vaultId, 
+    //   0
+    // ) ;
+
+    // console.log("swap result",  result.toString()); 
 
     await tmaster._swapFromInstrument(
       toJunior, 
       scaledAmount, 
-      pp.mul(priceLimit), 
+      0, 
       vaultId, 
-      0
+      0 , {gasLimit:10000000}
     ); 
 }
 
@@ -533,7 +559,6 @@ export async function doMakerTrade(
   isReduce: boolean = false
   ){
     const scaled_amount = pp.mul(amount); 
-    vaultId = 3; 
 
     const tmaster = new ethers.Contract(
     tMaster, tmasterabi, getProviderOrSigner(library, account)
@@ -577,7 +602,6 @@ export async function addOrRemoveTrancheLiq(
   isRemove: boolean, 
   ){
     const scaled_amount = pp.mul(amount); 
-    vaultId = 3; 
 
     const tmaster = new ethers.Contract(
     tMaster, tmasterabi, getProviderOrSigner(library, account)
@@ -610,6 +634,52 @@ export async function addOrRemoveTrancheLiq(
     const pointUpper = await amm.priceToPoint(pp.mul(priceUpper*100).div(100))
     if(isRemove) await amm.provideLiquidity(pointLower, pointUpper, amount, 0); 
     else await amm.provideLiquidity(pointLower, pointUpper, amount, 0); 
+}
+
+// if add should specify in terms of want, if remove, should specify in terms of shares
+export async function oammAddOrRemoveTrancheLiq(
+  account: string,
+  library: Web3Provider, 
+  vaultId: number, 
+  amount: number, 
+  isRemove: boolean, 
+  ){
+  console.log('isremove', isRemove); 
+  const scaled_amount = pp.mul(amount); 
+  
+  const factory = new ethers.Contract(tFactory,
+    factoryabi, getProviderOrSigner(library, account)
+    ); 
+  const contracts = await factory.getContracts(vaultId); 
+  const oamm = new ethers.Contract(contracts.amm, oracleAMMabi,getProviderOrSigner(library, account) ); 
+
+  if(!isRemove){
+    const want = new ethers.Contract( contracts.param._want, ERC20ABI, getProviderOrSigner(library, account)); 
+    await want.approve(contracts.amm, scaled_amount); 
+
+    await oamm.deposit(scaled_amount, account,  {gasLimit:10000000}); 
+  }
+  else{
+    //const bal = await oamm.balanceOf(account); 
+    const contracts = await factory.getContracts(vaultId); 
+    const splitter = new ethers.Contract(contracts.splitter, splitterabi  , getProviderOrSigner(library, account)); 
+    const prices = await splitter.computeValuePricesView(); 
+    await splitter.computeValuePricesView(); 
+    await splitter.computeValuePricesView(); 
+    await splitter.computeValuePricesView(); 
+    await splitter.computeValuePricesView(); 
+    console.log('prices', prices[0].toString(), prices[1].toString(),prices[2].toString())
+
+    // await splitter.computeValuePrices().catch( (e) => {
+    //       console.log(e);
+    //       throw e;
+    //     }); 
+    // await splitter.computeValuePrices(); 
+    // await splitter.computeValuePrices(); 
+
+    await oamm.redeem(scaled_amount, account, account,  {gasLimit:10000000}); 
+  }
+
 }
 
 
@@ -722,17 +792,32 @@ export async function fillQueue(){}
 export async function mintTVaultFromVaults(){}
 const testVault1Address_ = "0x8c57E2d18642F29bE076b97fD7240CBe8b7777c0"; 
 const testVault2Address_ = "0x27dF2D016Be2A3499d7eB0466c64046f3d7347Ea"; 
-
+interface InitParams{
+  _want: string; 
+  _instruments: string[]; 
+  _ratios: BigNumber[];
+  _junior_weight: BigNumber;
+  _promisedReturn: BigNumber;
+  inceptionTime: BigNumber; 
+  vaultId: BigNumber; 
+  inceptionPrice: BigNumber; 
+  oracleAMM: boolean; 
+}
 export async function createExampleSuperVault (
   account: string,
   library: Web3Provider,
+  name: string[] = ["-CPI", "stETH"], 
+  description: string="This is a tVault with stETH as a single asset and CPI as underlying. Both Senior/Junior receives staking yields, but senior holders are pegged to CPI and Junior holders are exposed to leveraged ETH/CPI",
   _want: string = testerc, 
   _instruments: string[] = [testVault1Address_,testVault2Address_ ], 
   _ratios: string[] = ["600000", "400000"], 
   _junior_weight: string = "300000", 
   _promisedReturn: string = "100000",
   _time_to_maturity: string = "1000000", 
-  vaultId: string = "0"
+  vaultId: string = "0", 
+  oracle: string =ethcpioracle, 
+  _assetIsErc20: boolean = true, 
+  oracleAMM: boolean = true
 ): Promise<TransactionResponse> {
   let tx: TransactionResponse
   const params = {} as InitParams; 
@@ -740,25 +825,29 @@ export async function createExampleSuperVault (
     params._instruments =  _instruments; 
     params._ratios = [pp.mul(7).div(10), pp.mul(3).div(10)]; 
     params._junior_weight = pp.mul(3).div(10); 
-    params._promisedReturn = pp.mul(1).div(10);
-    params._time_to_maturity = pp.mul(0);
+    params._promisedReturn = pp.mul(11).div(10);
+    params.inceptionTime = pp.mul(0);
     params.vaultId = pp.mul(0);   // const _want = collateral_address; 
     params.inceptionPrice = pp; 
+    params.oracleAMM= oracleAMM; 
 
     const factory = new ethers.Contract(tFactory,
     factoryabi, getProviderOrSigner(library, account)
     );
-
+    console.log('tFactory', tFactory); 
    await factory.setTrancheMaster( tMaster); 
-   await factory.createVault(params,["d","d"], "description",{
+      const id = await factory.id() ;
+
+   await factory.createVault(params,name, description,{
     gasLimit:10000000
    }); 
-   const id = await factory.id() ;
-   console.log('id',  id.toString()-1); 
-  await factory.createSplitterAndPool(0, {gasLimit:10000000}); 
-   await factory.createLendingPools(0, {gasLimit:10000000});
-   console.log('created', id.toString()-1); 
 
+  await factory.createSplitterAndPool(id.toString(), {gasLimit:10000000}); 
+   await factory.createLendingPools(id.toString(), {gasLimit:10000000});
+   console.log('created', id.toString()-1); 
+   if(oracle != ""){
+    await factory.setExchangeRateOracle( id.toString(), oracle,  _assetIsErc20)
+   }
  // const cont = await factory.getContracts(0);
     // tx = await tFact.createVault(params, ["senior","junior"] ,"description");
   // try {
@@ -838,6 +927,20 @@ export const getUserInfos = async(
     tFactory, account, vaultId); 
   return info; 
 }
+
+export async function fetchOracleData(
+  account: string, 
+  library: Web3Provider,
+  vaultId: string){
+  // todo get oracle 
+  const oracle = new ethers.Contract(ethcpioracle, 
+    oracleabi, getProviderOrSigner(library, account)); 
+  // const price = await oracle.getLatestPrice(); 
+  const exchangeRate = await oracle.getExchangeRate(); 
+  return exchangeRate.toString(); 
+  // console.log('price', price.toString(), exchangeRate.toString()); 
+}
+
 export async function fetchSuperVault(
   account: string, 
   library: Web3Provider, 
